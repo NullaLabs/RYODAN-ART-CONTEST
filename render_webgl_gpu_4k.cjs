@@ -38,7 +38,7 @@ async function renderWebGL4KVideo() {
 
   console.log(`[1/6] Loaded & C1-Continuity-Verified ${totalFrames} frames (FPS=${telemetry.fps}, finalPhase=${contVarIdx.toFixed(2)})`);
 
-  console.log('[2/6] Launching GPU WebGL Renderer at native 2668x1500 -> 4K 3840x2160...');
+  console.log('[2/6] Launching GPU WebGL Renderer at NATIVE 4K UHD (3840x2160, 4:4:4 Full Chroma)...');
   const browser = await puppeteer.launch({
     executablePath: chromePath,
     headless: 'new',
@@ -51,13 +51,13 @@ async function renderWebGL4KVideo() {
       '--disable-gpu-vsync',
       '--disable-frame-rate-limit',
       '--disable-dev-shm-usage',
-      '--window-size=2668,1500'
+      '--window-size=3840,2160'
     ]
   });
 
   const page = await browser.newPage();
   await page.setCacheEnabled(false);
-  await page.setViewport({ width: 2668, height: 1500, deviceScaleFactor: 1 });
+  await page.setViewport({ width: 3840, height: 2160, deviceScaleFactor: 1 });
   await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
   await page.waitForFunction(() => window.ryodanApp && window.ryodanApp.renderer && window.ryodanApp.renderer.isLoaded, { timeout: 60000 });
 
@@ -68,11 +68,13 @@ async function renderWebGL4KVideo() {
       const el = document.querySelector(sel);
       if (el) el.style.display = 'none';
     }
+    window.ryodanApp.canvas.style.width = '3840px';
+    window.ryodanApp.canvas.style.height = '2160px';
     window.ryodanApp.renderer.renderer.setPixelRatio(1.0);
-    window.ryodanApp.renderer.resize(2668, 1500);
+    window.ryodanApp.renderer.resize(3840, 2160);
   });
 
-  console.log('[3/6] Starting FFmpeg Sovereign 4K UHD Hardware NVENC Encoder (3840x2160, Spatial-AQ + Temporal-AQ)...');
+  console.log('[3/6] Starting FFmpeg Sovereign 4K UHD Hardware NVENC Encoder (Native 3840x2160 yuvj444p -> CQ 14 Master)...');
   const ffArgs4K = [
     '-y',
     '-f', 'image2pipe',
@@ -80,17 +82,17 @@ async function renderWebGL4KVideo() {
     '-r', String(telemetry.fps),
     '-i', '-',
     '-i', audioWav,
-    '-vf', 'scale=3840:2160:flags=lanczos',
     '-c:v', 'h264_nvenc',
-    '-preset', 'p6',
+    '-preset', 'p7',
     '-tune', 'hq',
     '-rc', 'vbr',
-    '-cq', '19',
-    '-b:v', '6.5M',
-    '-maxrate', '9.5M',
-    '-bufsize', '19.0M',
+    '-cq', '14',
+    '-b:v', '0',
+    '-maxrate', '45M',
+    '-bufsize', '90M',
     '-spatial-aq', '1',
     '-temporal-aq', '1',
+    '-aq-strength', '15',
     '-pix_fmt', 'yuv420p',
     '-c:a', 'aac',
     '-b:a', '320k',
@@ -101,7 +103,7 @@ async function renderWebGL4KVideo() {
 
   const ffProc = spawn(ffmpegExe, ffArgs4K, { stdio: ['pipe', 'ignore', 'ignore'] });
 
-  console.log('[4/6] Rendering 1,205 frames on GPU...');
+  console.log('[4/6] Rendering 1,205 frames at Native 3840x2160 on GPU...');
   const batchSize = 3;
   for (let i = 0; i < totalFrames; i += batchSize) {
     const batch = telemetry.frames.slice(i, i + batchSize);
@@ -122,7 +124,7 @@ async function renderWebGL4KVideo() {
         }
         app.renderer.render(f.t, 0.0, f.energy, f.t);
         gl.finish();
-        out.push(canvas.toDataURL('image/jpeg', 0.98));
+        out.push(canvas.toDataURL('image/jpeg', 1.0));
         await new Promise(r => setTimeout(r, 0));
       }
       return out;
@@ -142,8 +144,8 @@ async function renderWebGL4KVideo() {
   }
 
   ffProc.stdin.end();
-  await new Promise(resolve => ffProc.on('close', resolve));
   await browser.close();
+  await new Promise(resolve => ffProc.on('close', resolve));
 
   const size4K = (fs.statSync(outMp4_4K).size / (1024 * 1024)).toFixed(2);
   console.log(`✅ [4K UHD MASTER COMPLETE]: ${outMp4_4K} (${size4K} MB)`);
@@ -154,15 +156,16 @@ async function renderWebGL4KVideo() {
       '-y', '-i', outMp4_4K,
       '-vf', 'scale=2560:1440:flags=lanczos',
       '-c:v', 'h264_nvenc',
-      '-preset', 'p6',
+      '-preset', 'p7',
       '-tune', 'hq',
       '-rc', 'vbr',
-      '-cq', '21',
-      '-b:v', '3.5M',
-      '-maxrate', '5.0M',
-      '-bufsize', '10.0M',
+      '-cq', '18',
+      '-b:v', '0',
+      '-maxrate', '18M',
+      '-bufsize', '36M',
       '-spatial-aq', '1',
       '-temporal-aq', '1',
+      '-aq-strength', '15',
       '-pix_fmt', 'yuv420p',
       '-c:a', 'copy',
       '-movflags', '+faststart',
@@ -173,12 +176,12 @@ async function renderWebGL4KVideo() {
   const size2K = (fs.statSync(outMp4_2K).size / (1024 * 1024)).toFixed(2);
   console.log(`✅ [2K QHD ULTRA-LIGHT MASTER COMPLETE]: ${outMp4_2K} (${size2K} MB)`);
 
-  console.log('[6/6] Generating High-Definition Subpixel GIF (1024x576, Sierra-2-4A Smooth Dither)...');
+  console.log('[6/6] Generating High-Definition Subpixel GIF (960x540, Compact Bayer Scale 5)...');
   const palettePath = 'E:\\RYODAN_STUDIO\\exports\\palette.png';
   await new Promise(resolve => {
     const p1 = spawn(ffmpegExe, [
-      '-y', '-ss', '22.5', '-t', '7.0', '-i', outMp4_4K,
-      '-vf', 'fps=15,scale=1024:576:flags=lanczos,palettegen=max_colors=256:stats_mode=full',
+      '-y', '-ss', '22.5', '-t', '6.0', '-i', outMp4_4K,
+      '-vf', 'fps=15,scale=960:540:flags=lanczos,hqdn3d=3:2:6:4,palettegen=max_colors=256:stats_mode=diff',
       '-update', '1',
       palettePath
     ], { stdio: 'ignore' });
@@ -186,8 +189,8 @@ async function renderWebGL4KVideo() {
   });
   await new Promise(resolve => {
     const p2 = spawn(ffmpegExe, [
-      '-y', '-ss', '22.5', '-t', '7.0', '-i', outMp4_4K, '-i', palettePath,
-      '-lavfi', 'fps=15,scale=1024:576:flags=lanczos[x];[x][1:v]paletteuse=dither=sierra2_4a:diff_mode=rectangle',
+      '-y', '-ss', '22.5', '-t', '6.0', '-i', outMp4_4K, '-i', palettePath,
+      '-lavfi', 'fps=15,scale=960:540:flags=lanczos,hqdn3d=3:2:6:4[x];[x][1:v]paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle',
       outGif
     ], { stdio: 'ignore' });
     p2.on('close', resolve);
