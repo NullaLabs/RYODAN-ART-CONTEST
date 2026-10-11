@@ -279,9 +279,12 @@ export class VisualizerRenderer {
       uniforms: {
         u_texLightsRed: { value: this.textures.lightsRed },
         u_time: { value: 0.0 },
+        u_mids: { value: 0.0 },
         u_snare: { value: 0.0 },
         u_kick: { value: 0.0 },
-        u_echo: { value: 0.0 }
+        u_echo: { value: 0.0 },
+        u_variantIndex: { value: 0.0 },
+        u_dropActive: { value: 0.0 }
       },
       transparent: true,
       depthWrite: false
@@ -380,7 +383,7 @@ export class VisualizerRenderer {
     const kick = (energy.kick !== undefined) ? energy.kick : energy.subBass;
     const echo = (energy.echo !== undefined) ? energy.echo : energy.mids;
     const snare = (energy.snare !== undefined) ? energy.snare : energy.highs;
-    const vIdx = (energy.variantIndex !== undefined) ? energy.variantIndex : (time * 0.8);
+    const vIdx = (energy.variantIndex !== undefined && energy.variantIndex > 0.001) ? energy.variantIndex : (time * 0.95);
 
     if (this.materials.goddess) {
       const u = this.materials.goddess.uniforms;
@@ -427,9 +430,12 @@ export class VisualizerRenderer {
     if (this.materials.redLights) {
       const u = this.materials.redLights.uniforms;
       u.u_time.value = time;
+      u.u_mids.value = energy.mids;
       u.u_snare.value = snare;
       u.u_kick.value = kick;
       u.u_echo.value = echo;
+      u.u_variantIndex.value = vIdx;
+      u.u_dropActive.value = energy.dropActive ? 1.0 : 0.0;
     }
 
     if (this.materials.shadowRgb) {

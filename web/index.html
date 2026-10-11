@@ -93,23 +93,31 @@
       height: 48px;
       width: auto;
       object-fit: contain;
-      filter: drop-shadow(0 0 16px rgba(0, 240, 255, 0.85));
+      filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 10px rgba(255, 255, 255, 0.35));
     }
 
     .loading-art-contest-tag {
       font-size: 20px;
       font-weight: 800;
       letter-spacing: 4px;
-      color: #00f0ff;
+      color: #ffffff;
       text-transform: uppercase;
-      text-shadow: 0 0 20px rgba(0, 240, 255, 0.85);
+      text-shadow: 0 0 14px rgba(255, 255, 255, 0.55), 0 2px 4px rgba(0, 0, 0, 0.9);
     }
 
     .loading-compass-wrap {
       display: flex;
       justify-content: center;
       align-items: center;
-      margin-bottom: 2px;
+      margin: 14px 0 8px 0;
+    }
+
+    .loading-rotating-compass {
+      width: 96px;
+      height: 96px;
+      object-fit: contain;
+      filter: drop-shadow(0 6px 20px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 12px rgba(255, 255, 255, 0.5));
+      animation: spinClockwise 10s linear infinite;
     }
 
     .loading-progress-track {
@@ -551,6 +559,52 @@
       filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.85)) drop-shadow(0 0 12px rgba(255, 255, 255, 0.35));
       opacity: 0.95;
     }
+
+    /* Fullscreen mode: video inside iOS glass window surrounded by rhythm-colored glass */
+    #margin-waves-frame {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    #fs-glass-window {
+      display: none;
+      position: absolute;
+      z-index: 9;
+      pointer-events: none;
+      border-radius: 32px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0%, rgba(10, 18, 36, 0.55) 45%, rgba(4, 8, 18, 0.72) 100%);
+      backdrop-filter: blur(26px) saturate(190%);
+      -webkit-backdrop-filter: blur(26px) saturate(190%);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-top: 1px solid rgba(255, 255, 255, 0.55);
+      box-shadow:
+        0 26px 80px rgba(0, 0, 0, 0.75),
+        0 0 48px var(--fs-glow, rgba(0, 240, 255, 0.45)),
+        0 1px 0 rgba(255, 255, 255, 0.4) inset,
+        0 -1px 0 rgba(0, 0, 0, 0.5) inset;
+    }
+
+    body.fs-mode #margin-waves-frame,
+    body.fs-mode #fs-glass-window {
+      display: block;
+    }
+
+    body.fs-mode canvas.web-margin-canvas {
+      display: none !important;
+    }
+
+    body.fs-mode #webgl-canvas {
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+      margin-bottom: 72px;
+    }
   </style>
 </head>
 <body>
@@ -562,7 +616,7 @@
       <span class="loading-art-contest-tag">// ART CONTEST</span>
     </div>
     <div class="loading-compass-wrap">
-      <img src="./assets/bar_compass_logo_white.png" class="rotating-compass-logo" alt="Compass Logo">
+      <img src="./assets/bar_compass_logo_white.png" class="rotating-compass-logo loading-rotating-compass" alt="Compass Logo">
     </div>
     <div class="loading-progress-track">
       <div id="loading-progress-bar" class="liquid-iridescent-bar"></div>
@@ -575,6 +629,9 @@
     <!-- Web Margin Waves Canvas (Strictly outside 16:9 image on web borders) -->
     <canvas id="margin-waves-left" class="web-margin-canvas"></canvas>
     <canvas id="margin-waves-right" class="web-margin-canvas"></canvas>
+
+    <canvas id="margin-waves-frame"></canvas>
+    <div id="fs-glass-window"></div>
 
     <canvas id="webgl-canvas"></canvas>
 

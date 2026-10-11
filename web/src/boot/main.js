@@ -29,6 +29,10 @@ class RyodanStudioApp {
     // 2. Setup Responsive Canvas Resize
     this.handleResize();
     window.addEventListener('resize', () => this.handleResize());
+    document.addEventListener('fullscreenchange', () => {
+      document.body.classList.toggle('fs-mode', !!document.fullscreenElement);
+      this.handleResize();
+    });
 
     // 3. Load Layers and Shaders
     await this.renderer.loadAssets((progress) => {
@@ -47,18 +51,24 @@ class RyodanStudioApp {
     const width = container.clientWidth;
     const height = container.clientHeight;
 
-    // Reserve lateral margin space on desktop so 3D crystal margins are visible without overlapping artwork
-    const reserveMargin = (width >= 1200) ? 260 : 0;
-    const availableW = Math.max(400, width - reserveMargin);
+    const isFs = document.body.classList.contains('fs-mode');
+
+    // Windowed: reserve lateral margin space. Fullscreen: glass-window frame with padding on every side
+    const reserveMargin = isFs ? 0 : ((width >= 1200) ? 260 : 0);
+    const padX = isFs ? 56 : 0;
+    const padTop = isFs ? 48 : 0;
+    const padBottom = isFs ? 120 : 0;
+    const availableW = Math.max(400, width - reserveMargin - padX * 2);
+    const availableH = Math.max(300, height - padTop - padBottom);
 
     // Preserve 16:9 / native artwork aspect ratio cleanly
     const nativeRatio = StudioConfig.canvas.aspectRatio;
     let renderW = availableW;
     let renderH = availableW / nativeRatio;
 
-    if (renderH > height) {
-      renderH = height;
-      renderW = height * nativeRatio;
+    if (renderH > availableH) {
+      renderH = availableH;
+      renderW = availableH * nativeRatio;
     }
 
     this.canvas.style.width = `${Math.floor(renderW)}px`;

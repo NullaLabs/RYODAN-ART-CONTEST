@@ -45,6 +45,12 @@ export class WebMarginWavesController {
     this.widthR = 0;
     this.height = 0;
 
+    this.frameCanvas = document.getElementById('margin-waves-frame');
+    this.frameCtx = this.frameCanvas ? this.frameCanvas.getContext('2d') : null;
+    this.glassWindow = document.getElementById('fs-glass-window');
+    this.frameW = 0;
+    this.frameH = 0;
+
     this.resize();
     window.addEventListener('resize', () => this.resize());
   }
@@ -54,6 +60,26 @@ export class WebMarginWavesController {
     if (!canvas || !this.canvasL || !this.canvasR) return;
 
     const rect = canvas.getBoundingClientRect();
+
+    // Fullscreen: full-window rhythm glass frame + iOS glass window bezel around the video
+    if (document.body.classList.contains('fs-mode') && this.frameCanvas) {
+      this.frameW = Math.floor(window.innerWidth);
+      this.frameH = Math.floor(window.innerHeight);
+      this.frameCanvas.width = Math.floor(this.frameW * this.dpr);
+      this.frameCanvas.height = Math.floor(this.frameH * this.dpr);
+      this.frameCanvas.style.width = `${this.frameW}px`;
+      this.frameCanvas.style.height = `${this.frameH}px`;
+      if (this.frameCtx) this.frameCtx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+
+      if (this.glassWindow) {
+        const bezel = 16;
+        const cRect = canvas.parentElement.getBoundingClientRect();
+        this.glassWindow.style.left = `${rect.left - cRect.left - bezel}px`;
+        this.glassWindow.style.top = `${rect.top - cRect.top - bezel}px`;
+        this.glassWindow.style.width = `${rect.width + bezel * 2}px`;
+        this.glassWindow.style.height = `${rect.height + bezel * 2}px`;
+      }
+    }
     const winW = window.innerWidth;
     const winH = window.innerHeight;
 
@@ -161,7 +187,62 @@ export class WebMarginWavesController {
     ctx.restore();
   }
 
+  renderFrame(ctx, time, energy) {
+    const w = this.frameW;
+    const h = this.frameH;
+    if (!ctx || w <= 2 || h <= 2) return;
+
+    const bass = energy.subBass || 0;
+    const mids = energy.mids || 0;
+    const highs = energy.highs || 0;
+    const impact = energy.impact || 0;
+    const drive = Math.min(1.0, bass * 0.6 + mids * 0.4 + highs * 0.3 + impact * 0.4);
+    const cycle = time * 0.35 + (energy.variantIndex || 0) * 0.8 + mids * 0.5;
+
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = 'rgba(3, 6, 14, 1)';
+    ctx.fillRect(0, 0, w, h);
+
+    // Four rhythm-driven auras orbiting the perimeter, each with its own palette phase
+    const anchors = [
+      [w * 0.02, h * (0.5 + 0.35 * Math.sin(time * 0.8 + mids))],
+      [w * 0.98, h * (0.5 + 0.35 * Math.cos(time * 0.7 + highs))],
+      [w * (0.5 + 0.38 * Math.sin(time * 0.6 + bass)), h * 0.02],
+      [w * (0.5 + 0.38 * Math.cos(time * 0.9 + mids)), h * 0.98]
+    ];
+    const radius = Math.max(w, h) * (0.42 + drive * 0.12);
+    anchors.forEach((a, i) => {
+      const col = getPaletteColor(cycle + i * 1.75, 0.70 + drive * 0.45);
+      const g = ctx.createRadialGradient(a[0], a[1], 8, a[0], a[1], radius);
+      g.addColorStop(0, col.replace('rgb', 'rgba').replace(')', `, ${0.42 + drive * 0.38})`));
+      g.addColorStop(0.55, col.replace('rgb', 'rgba').replace(')', `, ${0.12 + bass * 0.16})`));
+      g.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, w, h);
+    });
+
+    // Rhythmic diagonal glass sweep
+    const sweep = ((time * 0.22 + drive * 0.2) % 2.0) - 0.5;
+    const sx = w * sweep;
+    const sg = ctx.createLinearGradient(sx - 220, 0, sx + 220, h * 0.4);
+    sg.addColorStop(0, 'rgba(255, 255, 255, 0)');
+    sg.addColorStop(0.5, `rgba(255, 255, 255, ${0.05 + highs * 0.10})`);
+    sg.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    ctx.fillStyle = sg;
+    ctx.fillRect(0, 0, w, h);
+
+    // Drive the glass-window bezel glow with the current rhythm color
+    document.documentElement.style.setProperty(
+      '--fs-glow',
+      getPaletteColor(cycle, 0.9 + drive * 0.4).replace('rgb', 'rgba').replace(')', `, ${0.40 + drive * 0.40})`)
+    );
+  }
+
   update(time, energy) {
+    if (document.body.classList.contains('fs-mode') && this.frameCtx) {
+      this.renderFrame(this.frameCtx, time, energy);
+      return;
+    }
     if (!this.ctxL || !this.ctxR) return;
 
     const delta = 0.016;

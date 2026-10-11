@@ -73,43 +73,46 @@ export const GoddessFragmentShader = `
     vec2 sampleUv = vUv;
     vec3 colBlue = baseBlueSample.rgb;
 
-    // 2. Full-Song Sound Tracking with Rich Multi-Stop Chromatic Gradients
+    // 2. Full-Song Sound Tracking with Fast Fluid Multi-Stop Chromatic Gradients & Aggressive Drop Sync
     // Primary baseline is Sovereign Blue (colBlue)
     
-    // Spatial gradient flow coordinate: diagonal angle following the flow of the hair & composition
-    float diagCoord = vUv.x * 1.5 + vUv.y * 2.0;
+    // Spatial gradient flow coordinates following the diagonal flow of the hair, armor & composition
+    float diagCoord = vUv.x * 1.65 + vUv.y * 2.15;
+    float crossCoord = vUv.x * 2.10 - vUv.y * 1.45;
 
-    // Smooth continuous harmonic waves (pure time-integrated phase = 100% C1 mathematical fluidity, zero phase snapping!)
-    float wave1 = sin(vUv.y * 4.2 - u_time * 1.6 + vUv.x * 2.4) * 0.5 + 0.5;
-    float wave2 = cos(vUv.x * 3.4 + u_time * 1.3 - vUv.y * 2.8) * 0.5 + 0.5;
+    // Smooth continuous harmonic waves (pure time-integrated phase = 100% C1 mathematical fluidity, zero cuts!)
+    float waveSpeed = (u_dropActive > 0.5) ? 2.65 : 1.85;
+    float wave1 = sin(vUv.y * 4.6 - u_time * waveSpeed + vUv.x * 2.8 + u_variantIndex * 0.55) * 0.5 + 0.5;
+    float wave2 = cos(vUv.x * 3.8 + u_time * (waveSpeed * 0.85) - vUv.y * 3.1 - u_variantIndex * 0.45) * 0.5 + 0.5;
+    float wave3 = sin(diagCoord * 3.6 - u_time * (waveSpeed * 1.25) + u_variantIndex * 0.95) * 0.5 + 0.5;
 
-    // Concentric ripple expanding smoothly with time
+    // Concentric ripple expanding smoothly from the Goddess center
     vec2 faceCenter = vec2(0.57, 0.62);
     float radialDist = length(vUv - faceCenter);
-    float rippleWave = sin(radialDist * 11.0 - u_time * 2.8) * 0.5 + 0.5;
+    float rippleWave = sin(radialDist * 12.0 - u_time * (3.4 + 1.4 * u_dropActive)) * 0.5 + 0.5;
 
-    // Music modulates the amplitude/strength smoothly, NEVER the phase angle
-    float rippleIntensity = (rippleWave - 0.5) * (0.10 + 0.20 * u_kick);
+    // Music modulates amplitude smoothly, NEVER snapping phase
+    float rippleIntensity = (rippleWave - 0.5) * (0.14 + 0.28 * u_kick + 0.18 * u_dropActive * u_impact);
 
-    // Master gradient phase: driven strictly by continuous accumulated u_variantIndex + spatial coordinate
-    float masterPhase = u_variantIndex * 1.25 + diagCoord * 0.70 + rippleIntensity;
+    // Master gradient phase: faster continuous color flow across the 7 chromatic variants
+    float masterPhase = u_variantIndex * 1.45 + u_time * (0.65 + 0.55 * u_dropActive) + diagCoord * 0.85 + rippleIntensity;
 
-    // Gradient Band 1 (Primary Flow): Stop A -> Stop B
+    // Gradient Band 1 (Primary Rapid Flow): Stop A -> Stop B
     float pA = mod(masterPhase, 7.0);
     float iPA = floor(pA);
     float fPA = smoothstep(0.0, 1.0, fract(pA));
     int idxA0 = int(iPA) + 1;
     int idxA1 = int(mod(iPA + 1.0, 7.0)) + 1;
 
-    // Gradient Band 2 (Offset Flow +2.33 variants): Stop C -> Stop D
-    float pB = mod(masterPhase + 2.33, 7.0);
+    // Gradient Band 2 (Counter-Flow +2.15 variants): Stop C -> Stop D
+    float pB = mod(masterPhase + 2.15 + crossCoord * 0.35, 7.0);
     float iPB = floor(pB);
     float fPB = smoothstep(0.0, 1.0, fract(pB));
     int idxB0 = int(iPB) + 1;
     int idxB1 = int(mod(iPB + 1.0, 7.0)) + 1;
 
-    // Gradient Band 3 (High-Contrast Accent +4.66 variants): Stop E -> Stop F
-    float pC = mod(masterPhase + 4.66, 7.0);
+    // Gradient Band 3 (High-Contrast Warm/Neon Accent +4.30 variants): Stop E -> Stop F
+    float pC = mod(masterPhase + 4.30 - radialDist * 0.90, 7.0);
     float iPC = floor(pC);
     float fPC = smoothstep(0.0, 1.0, fract(pC));
     int idxC0 = int(iPC) + 1;
@@ -127,30 +130,52 @@ export const GoddessFragmentShader = `
     vec3 colGradB = mix(varB0, varB1, fPB);
     vec3 colGradC = mix(varC0, varC1, fPC);
 
-    // Layer the gradient bands into a rich multi-chromatic tapestry
+    // Layer the gradient bands into a rich, rapidly shifting multi-chromatic tapestry
     vec3 multiGradient = mix(colGradA, colGradB, wave1);
-    multiGradient = mix(multiGradient, colGradC, wave2 * (0.30 + 0.30 * u_snare + 0.15 * u_impact));
+    float accentMix = clamp(wave2 * (0.38 + 0.38 * u_snare + 0.28 * u_impact + 0.22 * u_dropActive), 0.0, 0.92);
+    multiGradient = mix(multiGradient, colGradC, accentMix);
+
+    // During the heavy drop (u_dropActive > 0.5), weave in an aggressive, fluid 4th chromatic surge
+    if (u_dropActive > 0.5) {
+      vec3 colWarmRed = mix(texture2D(u_texWarm, sampleUv).rgb, texture2D(u_texRed, sampleUv).rgb, wave3);
+      vec3 colCyanGold = mix(texture2D(u_texCyan, sampleUv).rgb, texture2D(u_texYellow, sampleUv).rgb, 1.0 - wave1);
+      vec3 dropSurgeCol = mix(colWarmRed, colCyanGold, wave2);
+      float dropSurgeFactor = clamp((0.32 + 0.48 * u_kick + 0.42 * u_snare + 0.35 * u_impact) * wave3, 0.0, 0.85);
+      multiGradient = mix(multiGradient, dropSurgeCol, dropSurgeFactor);
+    }
+
+    // Fluid Rhythmic Pulse / Blink ("parpadeos fluidos sin que se vea forzado o cortado")
+    // Uses pure C1-continuous sine/cosine oscillators modulated by the beat envelope
+    float rhythmPulseWave = sin(u_time * (5.2 + 2.6 * u_dropActive) - diagCoord * 2.2) * 0.5 + 0.5;
+    float subPulseWave = cos(u_time * (8.4 + 3.2 * u_dropActive) + radialDist * 6.0) * 0.5 + 0.5;
+    float fluidBeatBlink = mix(rhythmPulseWave, subPulseWave, 0.38);
 
     // General Song Sound Envelope (combines full song RMS, kicks, snares, mids, highs)
     float fullSongDrive = clamp(
-      u_impact * 0.55 +
-      u_mids   * 0.35 +
-      u_snare  * 0.45 +
-      u_kick   * 0.45 +
-      u_highs  * 0.25,
+      u_impact * 0.58 +
+      u_mids   * 0.38 +
+      u_snare  * 0.50 +
+      u_kick   * 0.52 +
+      u_highs  * 0.28,
       0.0, 1.0
     );
 
-    // Sovereign Blue is the pristine primary starting state; fullSongDrive weaves fluid changing colors
-    float variantMix = (u_dropActive > 0.5)
-      ? clamp(0.22 + fullSongDrive * 0.72, 0.0, 0.92)
-      : clamp(fullSongDrive * 0.75, 0.0, 0.85);
+    // Fluid rhythmic modulation of gradient visibility:
+    // Pre-drop: smooth flowing gradients with gentle rhythmic breathing
+    // Drop (u_dropActive > 0.5): aggressive, dynamic, high-contrast rhythmic color surges & fluid pulses
+    float preDropMix = clamp(0.18 + fullSongDrive * 0.62 + fluidBeatBlink * (0.14 + 0.22 * fullSongDrive), 0.0, 0.88);
+    float dropDynamicMix = clamp(
+      0.28 + fullSongDrive * 0.52 + fluidBeatBlink * (0.22 + 0.38 * (u_kick + u_snare * 0.8 + u_impact * 0.7)),
+      0.22, 0.97
+    );
+    float variantMix = mix(preDropMix, dropDynamicMix, u_dropActive);
 
     vec3 baseCol = mix(colBlue, multiGradient, variantMix);
 
-    // Smooth HDR Dynamic Contrast on beats without harsh flashes
+    // Smooth HDR Dynamic Contrast & Fluid Rhythmic Glow on beats (zero harsh flashes or cuts)
     float lum = dot(baseCol, vec3(0.299, 0.587, 0.114));
-    float highlightBoost = pow(clamp(lum, 0.0, 1.0), 1.8) * (fullSongDrive * 0.22 + u_kick * 0.16);
+    float dropBoost = 1.0 + u_dropActive * (0.55 + 0.45 * fluidBeatBlink);
+    float highlightBoost = pow(clamp(lum, 0.0, 1.0), 1.65) * (fullSongDrive * 0.26 + u_kick * 0.22 + u_snare * 0.16) * dropBoost;
     baseCol += baseCol * highlightBoost;
 
     // Holographic Laser Scanner Bar (subtle cyan-hologram line with gentle phosphor trail)
@@ -247,7 +272,7 @@ export const DomeFragmentShader = `
 
 /**
  * 3A. COLORED CITY LIGHTS SHADER ([18] 5color luces & [19] 4Copia de color luces)
- * Capa 4 y Capa 5: "cambia de color con color luces igual" - Synchronized multi-color palette
+ * Capa 4 (8s on/off cycle) y Capa 5 (subtly more diffused and slightly toned down)
  */
 export const CityLightsFragmentShader = `
   uniform sampler2D u_texLightsGreen;
@@ -265,7 +290,19 @@ export const CityLightsFragmentShader = `
     vec4 lGreen = texture2D(u_texLightsGreen, vUv);
     vec4 lWhite = texture2D(u_texLightsWhite, vUv);
 
-    if (lGreen.a < 0.004 && lWhite.a < 0.004) {
+    // Wider, softer two-ring Gaussian radial blur of Layer 5 alpha ("sutilmente más difuminada")
+    float blurA = lGreen.a * 1.1;
+    float wSum = 1.1;
+    for (int i = 0; i < 8; i++) {
+      float ang = float(i) * 0.785398;
+      vec2 dir = vec2(cos(ang), sin(ang));
+      blurA += texture2D(u_texLightsGreen, vUv + dir * 0.0042).a * 1.25;
+      blurA += texture2D(u_texLightsGreen, vUv + dir * 0.0095).a * 0.90;
+      wSum += 2.15;
+    }
+    blurA /= wSum;
+
+    if (blurA < 0.003 && lWhite.a < 0.004) {
       discard;
     }
 
@@ -287,15 +324,16 @@ export const CityLightsFragmentShader = `
 
     vec3 syncedTint = mix(domePalette, iridescence, 0.45);
 
-    // Highly responsive pulse to beats (kick, snare, mids)
-    float pulse = 0.85 + 0.40 * u_kick + 0.30 * u_snare + 0.25 * u_mids + 0.20 * u_echo;
+    // Responsive pulse to beats (kick, snare, mids)
+    float pulse = 0.82 + 0.35 * u_kick + 0.25 * u_snare + 0.22 * u_mids + 0.18 * u_echo;
 
-    // CAPA 5: "debe verse como antes"
-    float aG = clamp(pow(lGreen.a, 0.50) * 0.95 * pulse, 0.0, 1.0);
-    vec3 colG = syncedTint * (1.20 + 0.30 * u_echo + 0.35 * u_kick);
+    // CAPA 5: "la capa 5 debe verse un poco menos sutilmente mas difuminada"
+    float aSharp = clamp(pow(lGreen.a, 0.65) * 0.36 * pulse, 0.0, 1.0);
+    float aSoft = clamp(pow(clamp(blurA, 0.0, 1.0), 0.72) * 0.68 * pulse, 0.0, 1.0);
+    float aG = clamp(mix(aSoft, max(aSharp, aSoft), 0.28), 0.0, 0.64);
+    vec3 colG = syncedTint * (1.08 + 0.22 * u_echo + 0.25 * u_kick);
 
     // CAPA 4: "debe verse y apagarse y encenderse cada 8 segundos"
-    // 8-second periodic cycle: smoothly turns on, shines, turns off, repeats every 8s
     float cycle8 = mod(u_time, 8.0);
     float onOff4 = smoothstep(0.0, 0.8, cycle8) * (1.0 - smoothstep(4.0, 4.8, cycle8));
 
@@ -310,43 +348,110 @@ export const CityLightsFragmentShader = `
 `;
 
 /**
- * 3B. SKYSCRAPER AVIATION BEACON RED LIGHTS SHADER ([20] 3 color luces // solo parpadea color)
- * Capa 3: "solo parpadea color" - Continuous base visibility + subtle glow + rhythmic aviation blink
+ * 3B. AUTHENTIC LAYER 3 SHADER ([20] 04_3 color luces // solo parpadea color)
+ * - Inside Dome (R channel): Only tallest building top lights from user's original Layer 3, subtle red with soft glow.
+ * - Outside Dome (G channel): User's original Layer 3 outer lights with fast-flowing multi-color gradients & smooth fluid blinking.
  */
 export const RedLightsFragmentShader = `
   uniform sampler2D u_texLightsRed;
   uniform float u_time;
+  uniform float u_mids;
   uniform float u_snare;
   uniform float u_kick;
   uniform float u_echo;
+  uniform float u_variantIndex;
+  uniform float u_dropActive;
 
   varying vec2 vUv;
 
+  vec3 evalGradient7(float phase) {
+    vec3 c0 = vec3(0.00, 0.94, 1.00); // Sovereign Cyan
+    vec3 c1 = vec3(0.14, 0.46, 1.00); // Sovereign Blue
+    vec3 c2 = vec3(0.68, 0.22, 1.00); // Electric Violet
+    vec3 c3 = vec3(1.00, 0.16, 0.58); // Neon Magenta
+    vec3 c4 = vec3(1.00, 0.24, 0.16); // Crimson Red-Coral
+    vec3 c5 = vec3(1.00, 0.84, 0.24); // Solar Amber Gold
+    vec3 c6 = vec3(0.10, 0.98, 0.62); // Emerald Jade
+
+    float s = mod(phase, 1.0) * 7.0;
+    float idx = floor(s);
+    float f = smoothstep(0.0, 1.0, fract(s));
+    if (idx < 1.0) return mix(c0, c1, f);
+    if (idx < 2.0) return mix(c1, c2, f);
+    if (idx < 3.0) return mix(c2, c3, f);
+    if (idx < 4.0) return mix(c3, c4, f);
+    if (idx < 5.0) return mix(c4, c5, f);
+    if (idx < 6.0) return mix(c5, c6, f);
+    return mix(c6, c0, f);
+  }
+
   void main() {
     vec4 lRed = texture2D(u_texLightsRed, vUv);
-    if (lRed.a < 0.005) {
+
+    // Subtle 8-tap radial optical glow around the authentic Layer 3 pixels ("un sutil glow no mucho")
+    float glowR = lRed.r * lRed.a;
+    float glowG = lRed.g * lRed.a;
+    float haloA = 0.0;
+    for (int i = 0; i < 8; i++) {
+      float ang = float(i) * 0.785398;
+      vec2 dir = vec2(cos(ang), sin(ang)) * 0.0022;
+      vec4 tap = texture2D(u_texLightsRed, vUv + dir);
+      glowR += tap.r * tap.a * 0.45;
+      glowG += tap.g * tap.a * 0.45;
+      haloA += tap.a * 0.125;
+    }
+
+    float combinedA = max(lRed.a, haloA * 0.55);
+    if (combinedA < 0.004) {
       discard;
     }
 
-    // Intermittent rhythmic aviation blink cadence modulated by tempo & beat (never drops to zero!)
-    float antennaWave = sin(u_time * 2.8 + u_snare * 2.0);
-    float beaconBlink = 0.48 + 0.52 * smoothstep(0.10, 0.85, antennaWave);
-    float musicKickBoost = 0.85 + 0.45 * u_kick + 0.30 * u_snare;
+    // Determine whether this pixel belongs to Inside-Dome Tall Skyscraper Tops (R) or Outside-Dome Lights (G)
+    if (glowR >= glowG) {
+      // INSIDE DOME: Subtle red top lights ONLY on the tallest buildings ("mi misma capa pero sutil y preservando la luz alta en los edificios mas altos solo de la capa 3")
+      float antennaWave = sin(u_time * 2.8 + vUv.x * 4.0 + u_snare * 1.4);
+      float beaconBlink = 0.54 + 0.46 * (0.5 + 0.5 * antennaWave);
+      float musicBoost = 0.82 + 0.32 * u_kick + 0.24 * u_snare;
 
-    // Pinpoint center with subtle red optical glow aura
-    float pinpointCenter = smoothstep(0.40, 0.88, lRed.a);
-    float glowAura = smoothstep(0.04, 0.65, lRed.a);
-    vec3 redCore = vec3(1.0, 0.06, 0.10);
-    vec3 whiteHotCenter = vec3(1.0, 0.90, 0.88);
-    vec3 finalRgb = mix(redCore, whiteHotCenter, pinpointCenter * 0.82);
+      float coreCenter = smoothstep(0.45, 0.92, lRed.a);
+      vec3 redCore = vec3(1.0, 0.08, 0.12);
+      vec3 warmTip = vec3(1.0, 0.74, 0.68);
+      vec3 finalRgb = mix(redCore, warmTip, coreCenter * 0.55);
 
-    // Subtle optical beacon glow (soft, not overpowering)
-    vec3 softGlow = vec3(1.0, 0.12, 0.16) * (0.42 + 0.35 * u_kick);
-    finalRgb += softGlow * glowAura;
+      // Subtle red optical aura
+      finalRgb += vec3(1.0, 0.12, 0.16) * haloA * (0.35 + 0.25 * u_kick);
 
-    float baseA = clamp(pow(lRed.a, 0.70) * 1.30, 0.0, 1.0);
-    float outA = clamp(baseA * beaconBlink * musicKickBoost, 0.0, 1.0);
-    gl_FragColor = vec4(finalRgb, outA);
+      float sharpA = pow(lRed.a, 0.78) * 0.76;
+      float softGlowA = pow(clamp(haloA, 0.0, 1.0), 0.85) * 0.34;
+      float outA = clamp(max(sharpA, softGlowA) * beaconBlink * musicBoost, 0.0, 0.78);
+      gl_FragColor = vec4(finalRgb, outA);
+    } else {
+      // OUTSIDE DOME: Authentic Layer 3 outer lights with fast-flowing multi-color gradients & smooth fluid blinking
+      // ("fuera de la cupula tambien tenia con mi capa con los degradados de ahora haciendo que los degradados cambien mas rapido fluidamente de colores pasando y parpadeos fluidos sin que se vea forzado o cortado")
+      float flowSpeed = (u_dropActive > 0.5) ? 0.52 : 0.34;
+      float spatialPhase = vUv.x * 1.35 + vUv.y * 1.05;
+      float masterCycle = spatialPhase - u_time * flowSpeed - u_variantIndex * 0.14;
+
+      vec3 gradColA = evalGradient7(masterCycle);
+      vec3 gradColB = evalGradient7(masterCycle + 0.38);
+      float waveMix = sin(vUv.x * 6.0 - u_time * 3.2 + vUv.y * 4.5) * 0.5 + 0.5;
+      vec3 outerGradRgb = mix(gradColA, gradColB, waveMix);
+
+      // Smooth C1-continuous rhythmic blinking (never forced, never cut)
+      float osc1 = sin(u_time * (4.6 + 2.2 * u_dropActive) + vUv.x * 5.2 - vUv.y * 3.6) * 0.5 + 0.5;
+      float osc2 = cos(u_time * (7.1 + 2.8 * u_dropActive) - vUv.x * 4.0 + vUv.y * 4.8) * 0.5 + 0.5;
+      float fluidBlink = 0.38 + 0.62 * mix(osc1, osc2, 0.42);
+      float beatPulse = 0.84 + 0.45 * u_kick + 0.38 * u_snare + 0.28 * u_mids + 0.22 * u_echo;
+
+      float coreHighlight = smoothstep(0.50, 0.95, lRed.a);
+      vec3 finalRgb = mix(outerGradRgb, vec3(1.0, 0.98, 0.96), coreHighlight * 0.38) * (1.18 + 0.35 * u_kick + 0.25 * u_snare);
+      finalRgb += outerGradRgb * haloA * 0.45;
+
+      float sharpA = pow(lRed.a, 0.68) * 0.92;
+      float softGlowA = pow(clamp(haloA, 0.0, 1.0), 0.80) * 0.42;
+      float outA = clamp(max(sharpA, softGlowA) * fluidBlink * beatPulse, 0.0, 0.92);
+      gl_FragColor = vec4(finalRgb, outA);
+    }
   }
 `;
 

@@ -183,20 +183,23 @@ export class AudioEngine {
     this.prevHighs = this.energy.highs;
 
     // Continuous smooth color progression driven by song tempo, RMS energy and impacts
-    const beatPush = (this.energy.impact > 0.3) ? (this.energy.impact * 0.45) : 0.0;
-    this.energy.variantIndex = (this.energy.variantIndex || 0) + delta * (0.32 + this.energy.rms * 0.45 + beatPush);
+    // Accelerates fluidly during the heavy drop (dropActive) without any discontinuous jumps
+    const dropMult = this.energy.dropActive ? 2.15 : 1.0;
+    const beatPush = (this.energy.impact * 0.85 + this.energy.snare * 0.55) * dropMult;
+    const baseSpeed = this.energy.dropActive ? 1.15 : 0.58;
+    this.energy.variantIndex = (this.energy.variantIndex || 0) + delta * (baseSpeed + this.energy.rms * 0.95 * dropMult + beatPush);
 
-    if (bassFlux > 0.085 && (nowSec - this.lastOnsetTime) > 0.22) {
+    if (bassFlux > 0.075 && (nowSec - this.lastOnsetTime) > (this.energy.dropActive ? 0.16 : 0.22)) {
       this.lastOnsetTime = nowSec;
       this.energy.impact = 1.0;
     } else {
-      this.energy.impact *= this.energy.dropActive ? 0.92 : 0.89;
+      this.energy.impact *= this.energy.dropActive ? 0.91 : 0.89;
     }
 
-    if (highFlux > 0.09) {
-      this.energy.snare = Math.min(1.0, 0.75 + this.energy.highs * 0.25);
+    if (highFlux > 0.08) {
+      this.energy.snare = Math.min(1.0, 0.78 + this.energy.highs * 0.22);
     } else {
-      this.energy.snare *= 0.82;
+      this.energy.snare *= this.energy.dropActive ? 0.86 : 0.82;
     }
 
     // Grit detection (noisy/broken high-transient burst for signal interference)
