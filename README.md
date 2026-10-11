@@ -1,6 +1,6 @@
 # RYODAN CONTEST by Ethernium
 > **4K Ultra-Fidelity Sovereign Audio-Reactive Web Visualizer Engine**  
-> *Contest Entry by Blackbeard // Space Maeve // Ethernium Sovereign Web*
+> *Contest Entry by Blackbeard // Ethernium Sovereign Web*
 
 ---
 
@@ -8,7 +8,6 @@
 
 **RYODAN CONTEST by Ethernium** is a high-performance, local-first WebGL audio visualizer engineered with Three.js and custom GLSL shaders. It renders a complete 25-layer stacked composite directly in real-time at 60 FPS, maintaining full 4K UHD fidelity with zero CDN dependencies.
 
-- **Track:** Space Maeve (`space_maeve.m4a`)
 - **Visuals:** 25-Layer Cyberpunk PSD Stack (Diosa Cibernética, Floating City, Dome Ecosystem, Aviation Beacons, HUD, Katakana & MIA Typography, iOS Glass Credits Cartel)
 - **Engine:** Ethernium Sovereign Web GLSL Architecture
 
@@ -78,5 +77,4 @@ E:\RYODAN_STUDIO/
 
 ## 📜 Credits & License
 - **Visual Conception & Engineering:** Blackbeard (@steveblackbeard // @kreatosvortex)
-- **Audio:** Space Maeve
 - **Sovereign Engine:** Ethernium Ecosystem

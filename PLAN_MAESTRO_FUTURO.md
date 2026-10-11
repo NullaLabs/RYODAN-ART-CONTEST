@@ -1,6 +1,6 @@
 # 🏛️ PLAN MAESTRO FUTURO: ECOSISTEMA AUDIOVISUAL RYODAN (ETHERNIUM SOVEREIGN)
 
-> **Propósito de este documento:** Hoja de ruta estratégica y técnica para consolidar y expandir la obra **RYODAN // Space Maeve** como estándar audiovisual soberano de alta fidelidad, aprovechando las innovaciones arquitectónicas de los repositorios núcleo de Ethernium (*CHRONOLITH*, *SENESCHAL*, *SYNKRONIA*, *OPTIMIZADOR GRÁFICO*, *KAPTURA*, *INVICTVS*).
+> **Propósito de este documento:** Hoja de ruta estratégica y técnica para consolidar y expandir la obra **RYODAN** como estándar audiovisual soberano de alta fidelidad, aprovechando las innovaciones arquitectónicas de los repositorios núcleo de Ethernium (*CHRONOLITH*, *SENESCHAL*, *SYNKRONIA*, *OPTIMIZADOR GRÁFICO*, *KAPTURA*, *INVICTVS*).
 
 ---
 
