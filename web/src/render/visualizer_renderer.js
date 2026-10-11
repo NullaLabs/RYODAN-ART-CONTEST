@@ -27,12 +27,12 @@ export class VisualizerRenderer {
 
     this.renderer = new THREE.WebGLRenderer({
       canvas: this.canvas,
-      antialias: true,
+      antialias: false,
       powerPreference: 'high-performance',
       preserveDrawingBuffer: true,
       alpha: false
     });
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2.0));
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1.0, 1.5));
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
 
     this.textureLoader = new THREE.TextureLoader();
@@ -89,7 +89,7 @@ export class VisualizerRenderer {
     ];
 
     let loadedCount = 0;
-    const loadPromise = (item) => {
+    const loadSingleWithRetry = (item, attempt = 0) => {
       return new Promise((resolve, reject) => {
         this.textureLoader.load(
           item.url,
@@ -104,12 +104,29 @@ export class VisualizerRenderer {
             resolve();
           },
           undefined,
-          (err) => reject(err)
+          (err) => {
+            if (attempt < 3) {
+              setTimeout(() => {
+                loadSingleWithRetry(item, attempt + 1).then(resolve).catch(reject);
+              }, 250 * (attempt + 1));
+            } else {
+              reject(err);
+            }
+          }
         );
       });
     };
 
-    await Promise.all(list.map(loadPromise));
+    // Load with 6 concurrent workers so remote tunnels never choke or throw 502
+    const queue = [...list];
+    const workers = Array.from({ length: 6 }, async () => {
+      while (queue.length > 0) {
+        const item = queue.shift();
+        if (item) await loadSingleWithRetry(item);
+      }
+    });
+
+    await Promise.all(workers);
     this.buildScene();
     this.isLoaded = true;
   }

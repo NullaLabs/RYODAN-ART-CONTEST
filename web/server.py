@@ -7,6 +7,9 @@ PORT = 8080
 DIRECTORY = Path(r"E:\RYODAN_STUDIO\web")
 
 class DualStackServer(http.server.ThreadingHTTPServer):
+    request_queue_size = 128
+    daemon_threads = True
+
     def server_bind(self):
         self.socket.setsockopt(http.server.socket.SOL_SOCKET, http.server.socket.SO_REUSEADDR, 1)
         super().server_bind()

@@ -50,16 +50,15 @@ export const GoddessFragmentShader = `
     return fract(p);
   }
 
-  vec3 sampleVariant(int idx, vec2 uv) {
-    vec3 c = texture2D(u_texBlue, uv).rgb;
-    if (idx == 1) c = texture2D(u_texCyan, uv).rgb;
-    else if (idx == 2) c = texture2D(u_texGreen, uv).rgb;
-    else if (idx == 3) c = texture2D(u_texYellow, uv).rgb;
-    else if (idx == 4) c = texture2D(u_texWarm, uv).rgb;
-    else if (idx == 5) c = texture2D(u_texRed, uv).rgb;
-    else if (idx == 6) c = texture2D(u_texBright, uv).rgb;
-    else if (idx == 7) c = texture2D(u_texShadow, uv).rgb;
-    return c;
+  vec3 pickVariant(int idx, vec3 cBlue, vec3 c1, vec3 c2, vec3 c3, vec3 c4, vec3 c5, vec3 c6, vec3 c7) {
+    if (idx == 1) return c1;
+    if (idx == 2) return c2;
+    if (idx == 3) return c3;
+    if (idx == 4) return c4;
+    if (idx == 5) return c5;
+    if (idx == 6) return c6;
+    if (idx == 7) return c7;
+    return cBlue;
   }
 
   void main() {
@@ -73,6 +72,15 @@ export const GoddessFragmentShader = `
     vec2 sampleUv = vUv;
     vec3 colBlue = baseBlueSample.rgb;
 
+    // Fetch each chromatic variant ONCE per fragment (eliminates 44 redundant 4K texture lookups per pixel for locked 60 FPS!)
+    vec3 texCyan   = texture2D(u_texCyan, sampleUv).rgb;
+    vec3 texGreen  = texture2D(u_texGreen, sampleUv).rgb;
+    vec3 texYellow = texture2D(u_texYellow, sampleUv).rgb;
+    vec3 texWarm   = texture2D(u_texWarm, sampleUv).rgb;
+    vec3 texRed    = texture2D(u_texRed, sampleUv).rgb;
+    vec3 texBright = texture2D(u_texBright, sampleUv).rgb;
+    vec3 texShadow = texture2D(u_texShadow, sampleUv).rgb;
+
     // 2. Full-Song Sound Tracking with Fast Fluid Multi-Stop Chromatic Gradients & Aggressive Drop Sync
     // Primary baseline is Sovereign Blue (colBlue)
     
@@ -80,22 +88,21 @@ export const GoddessFragmentShader = `
     float diagCoord = vUv.x * 1.65 + vUv.y * 2.15;
     float crossCoord = vUv.x * 2.10 - vUv.y * 1.45;
 
-    // Smooth continuous harmonic waves (pure time-integrated phase = 100% C1 mathematical fluidity, zero cuts!)
-    float waveSpeed = (u_dropActive > 0.5) ? 2.65 : 1.85;
-    float wave1 = sin(vUv.y * 4.6 - u_time * waveSpeed + vUv.x * 2.8 + u_variantIndex * 0.55) * 0.5 + 0.5;
-    float wave2 = cos(vUv.x * 3.8 + u_time * (waveSpeed * 0.85) - vUv.y * 3.1 - u_variantIndex * 0.45) * 0.5 + 0.5;
-    float wave3 = sin(diagCoord * 3.6 - u_time * (waveSpeed * 1.25) + u_variantIndex * 0.95) * 0.5 + 0.5;
+    // Smooth continuous harmonic waves (u_time and u_variantIndex have the SAME sign so music ALWAYS accelerates flow, never stalls!)
+    float wave1 = sin(vUv.y * 4.6 - u_time * 1.85 - u_variantIndex * 0.65 + vUv.x * 2.8) * 0.5 + 0.5;
+    float wave2 = cos(vUv.x * 3.8 + u_time * 1.55 + u_variantIndex * 0.55 - vUv.y * 3.1) * 0.5 + 0.5;
+    float wave3 = sin(diagCoord * 3.6 - u_time * 2.25 - u_variantIndex * 0.95) * 0.5 + 0.5;
 
     // Concentric ripple expanding smoothly from the Goddess center
     vec2 faceCenter = vec2(0.57, 0.62);
     float radialDist = length(vUv - faceCenter);
-    float rippleWave = sin(radialDist * 12.0 - u_time * (3.4 + 1.4 * u_dropActive)) * 0.5 + 0.5;
+    float rippleWave = sin(radialDist * 12.0 - u_time * 3.4 - u_variantIndex * 0.85) * 0.5 + 0.5;
 
     // Music modulates amplitude smoothly, NEVER snapping phase
     float rippleIntensity = (rippleWave - 0.5) * (0.14 + 0.28 * u_kick + 0.18 * u_dropActive * u_impact);
 
     // Master gradient phase: faster continuous color flow across the 7 chromatic variants
-    float masterPhase = u_variantIndex * 1.45 + u_time * (0.65 + 0.55 * u_dropActive) + diagCoord * 0.85 + rippleIntensity;
+    float masterPhase = u_variantIndex * 1.45 + u_time * 0.65 + diagCoord * 0.85 + rippleIntensity;
 
     // Gradient Band 1 (Primary Rapid Flow): Stop A -> Stop B
     float pA = mod(masterPhase, 7.0);
@@ -118,12 +125,12 @@ export const GoddessFragmentShader = `
     int idxC0 = int(iPC) + 1;
     int idxC1 = int(mod(iPC + 1.0, 7.0)) + 1;
 
-    vec3 varA0 = sampleVariant(idxA0, sampleUv);
-    vec3 varA1 = sampleVariant(idxA1, sampleUv);
-    vec3 varB0 = sampleVariant(idxB0, sampleUv);
-    vec3 varB1 = sampleVariant(idxB1, sampleUv);
-    vec3 varC0 = sampleVariant(idxC0, sampleUv);
-    vec3 varC1 = sampleVariant(idxC1, sampleUv);
+    vec3 varA0 = pickVariant(idxA0, colBlue, texCyan, texGreen, texYellow, texWarm, texRed, texBright, texShadow);
+    vec3 varA1 = pickVariant(idxA1, colBlue, texCyan, texGreen, texYellow, texWarm, texRed, texBright, texShadow);
+    vec3 varB0 = pickVariant(idxB0, colBlue, texCyan, texGreen, texYellow, texWarm, texRed, texBright, texShadow);
+    vec3 varB1 = pickVariant(idxB1, colBlue, texCyan, texGreen, texYellow, texWarm, texRed, texBright, texShadow);
+    vec3 varC0 = pickVariant(idxC0, colBlue, texCyan, texGreen, texYellow, texWarm, texRed, texBright, texShadow);
+    vec3 varC1 = pickVariant(idxC1, colBlue, texCyan, texGreen, texYellow, texWarm, texRed, texBright, texShadow);
 
     // Smooth Hermite color blend within each gradient band
     vec3 colGradA = mix(varA0, varA1, fPA);
@@ -137,17 +144,17 @@ export const GoddessFragmentShader = `
 
     // During the heavy drop (u_dropActive > 0.5), weave in an aggressive, fluid 4th chromatic surge
     if (u_dropActive > 0.5) {
-      vec3 colWarmRed = mix(texture2D(u_texWarm, sampleUv).rgb, texture2D(u_texRed, sampleUv).rgb, wave3);
-      vec3 colCyanGold = mix(texture2D(u_texCyan, sampleUv).rgb, texture2D(u_texYellow, sampleUv).rgb, 1.0 - wave1);
+      vec3 colWarmRed = mix(texWarm, texRed, wave3);
+      vec3 colCyanGold = mix(texCyan, texYellow, 1.0 - wave1);
       vec3 dropSurgeCol = mix(colWarmRed, colCyanGold, wave2);
       float dropSurgeFactor = clamp((0.32 + 0.48 * u_kick + 0.42 * u_snare + 0.35 * u_impact) * wave3, 0.0, 0.85);
       multiGradient = mix(multiGradient, dropSurgeCol, dropSurgeFactor);
     }
 
     // Fluid Rhythmic Pulse / Blink ("parpadeos fluidos sin que se vea forzado o cortado")
-    // Uses pure C1-continuous sine/cosine oscillators modulated by the beat envelope
-    float rhythmPulseWave = sin(u_time * (5.2 + 2.6 * u_dropActive) - diagCoord * 2.2) * 0.5 + 0.5;
-    float subPulseWave = cos(u_time * (8.4 + 3.2 * u_dropActive) + radialDist * 6.0) * 0.5 + 0.5;
+    // Uses pure C1-continuous sine/cosine oscillators driven by time + monotonic variantIndex
+    float rhythmPulseWave = sin(u_time * 4.8 + u_variantIndex * 1.35 - diagCoord * 2.2) * 0.5 + 0.5;
+    float subPulseWave = cos(u_time * 7.6 + u_variantIndex * 1.85 + radialDist * 6.0) * 0.5 + 0.5;
     float fluidBeatBlink = mix(rhythmPulseWave, subPulseWave, 0.38);
 
     // General Song Sound Envelope (combines full song RMS, kicks, snares, mids, highs)

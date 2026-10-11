@@ -76,7 +76,7 @@ class RyodanStudioApp {
 
     // Internal buffer size for 4K crisp fidelity
     // When in high-DPI or 4K screen, render target can scale up to 3840x2160
-    const dpr = Math.min(window.devicePixelRatio || 1.0, 2.0);
+    const dpr = Math.min(window.devicePixelRatio || 1.0, 1.5);
     this.renderer.resize(renderW * dpr, renderH * dpr);
 
     // Update margin canvas geometry to align exactly with new canvas bounds

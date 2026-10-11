@@ -58,7 +58,7 @@ async function renderWebGL4KVideo() {
   const page = await browser.newPage();
   await page.setCacheEnabled(false);
   await page.setViewport({ width: 2668, height: 1500, deviceScaleFactor: 1 });
-  await page.goto(url, { waitUntil: 'networkidle0', timeout: 60000 });
+  await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
   await page.waitForFunction(() => window.ryodanApp && window.ryodanApp.renderer && window.ryodanApp.renderer.isLoaded, { timeout: 60000 });
 
   await page.evaluate(() => {
