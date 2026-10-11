@@ -2,12 +2,16 @@
 > **4K Ultra-Fidelity Sovereign Audio-Reactive Web Visualizer Engine**  
 > *Contest Entry by Blackbeard // Ethernium Sovereign Web*
 
+🌐 **Live Interactive 4K Studio (Public Link):**  
+👉 **[https://indicators-hobbies-intelligence-publishers.trycloudflare.com](https://indicators-hobbies-intelligence-publishers.trycloudflare.com)**
+
 ---
 
 ## ⚡ Overview
 
 **RYODAN CONTEST by Ethernium** is a high-performance, local-first WebGL audio visualizer engineered with Three.js and custom GLSL shaders. It renders a complete 25-layer stacked composite directly in real-time at 60 FPS, maintaining full 4K UHD fidelity with zero CDN dependencies.
 
+- **Live Web Experience:** [https://indicators-hobbies-intelligence-publishers.trycloudflare.com](https://indicators-hobbies-intelligence-publishers.trycloudflare.com)
 - **Visuals:** 25-Layer Cyberpunk PSD Stack (Diosa Cibernética, Floating City, Dome Ecosystem, Aviation Beacons, HUD, Katakana & MIA Typography, iOS Glass Credits Cartel)
 - **Engine:** Ethernium Sovereign Web GLSL Architecture
 
