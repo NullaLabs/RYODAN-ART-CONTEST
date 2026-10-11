@@ -1,0 +1,19 @@
+# OS / Editor artifacts
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+*.swp
+*.bak
+*~
+
+# Test captures
+web/test_fix_capture.png
+web/studio_live_capture.png
+
+# Node / Logs
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

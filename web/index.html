@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RYODAN // 4K SOVEREIGN AUDIO-REACTIVE STUDIO</title>
+
+  <!-- Local-First Import Map (Zero CDN Dependencies) -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "./vendor/three.module.js"
+    }
+  }
+  </script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: #03060c;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, monospace;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Main Viewport Container */
+    #canvas-container {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: radial-gradient(circle at center, #070d1e 0%, #020409 100%);
+    }
+
+    #webgl-canvas {
+      display: block;
+      box-shadow: 0 0 80px rgba(0, 240, 255, 0.15), 0 0 160px rgba(0, 0, 0, 0.9);
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      border-radius: 4px;
+      z-index: 10;
+    }
+
+    /* Web Margins Cyber Chrono Glass (Outer web margins outside artwork) */
+    .web-margin-canvas {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      height: 100%;
+      pointer-events: none;
+      z-index: 15;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    /* Loading Overlay */
+    #loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #03060c;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      transition: opacity 0.5s ease;
+    }
+
+    .loading-title {
+      font-size: 20px;
+      letter-spacing: 4px;
+      color: #00f0ff;
+      text-transform: uppercase;
+      font-weight: 700;
+      text-shadow: 0 0 20px rgba(0, 240, 255, 0.6);
+    }
+
+    .loading-progress-track {
+      width: 380px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 2px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #loading-progress-bar {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #00f0ff, #00ff9d);
+      box-shadow: 0 0 15px #00ff9d;
+      transition: width 0.15s ease-out;
+    }
+
+    #loading-percent {
+      font-size: 13px;
+      color: #64748b;
+      letter-spacing: 2px;
+    }
+
+    /* Glassmorphic 3D iOS / iMac HUD Panels */
+    .glass-panel-3d {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.09) 0%, rgba(10, 18, 36, 0.72) 40%, rgba(4, 8, 18, 0.88) 100%);
+      backdrop-filter: blur(28px) saturate(190%);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-top: 1px solid rgba(255, 255, 255, 0.35);
+      border-left: 1px solid rgba(255, 255, 255, 0.22);
+      box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.65),
+        0 1px 0 rgba(255, 255, 255, 0.25) inset,
+        0 -1px 0 rgba(0, 0, 0, 0.5) inset;
+    }
+
+    /* Header HUD */
+    .hud-header {
+      position: absolute;
+      top: 20px;
+      left: 24px;
+      right: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    /* Brand Header with Ryodan Logo & White Subtitle */
+    .brand-cluster-3d {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 8px 18px 8px 12px;
+      border-radius: 14px;
+      pointer-events: auto;
+    }
+
+    .brand-logo-img {
+      height: 38px;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 10px rgba(0, 240, 255, 0.45));
+    }
+
+    .brand-text-col {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .brand-subtitle-white {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 2.2px;
+      color: #ffffff;
+      text-transform: uppercase;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8), 0 0 12px rgba(255, 255, 255, 0.4);
+    }
+
+    .brand-engine-sub {
+      font-size: 9px;
+      letter-spacing: 1.8px;
+      color: #00f0ff;
+      opacity: 0.85;
+      text-transform: uppercase;
+    }
+
+    .telemetry-cluster {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      pointer-events: auto;
+    }
+
+    .telemetry-box-3d {
+      padding: 8px 16px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .telemetry-label {
+      font-size: 10px;
+      letter-spacing: 1.6px;
+      color: #94a3b8;
+      font-weight: 600;
+    }
+
+    #telemetry-fps {
+      font-size: 13px;
+      font-weight: 800;
+      color: #00ff9d;
+      text-shadow: 0 0 12px rgba(0, 255, 157, 0.6);
+    }
+
+    /* Bottom Control Dock (3D iMac Glass) */
+    .hud-dock-3d {
+      position: absolute;
+      bottom: 22px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 48px);
+      max-width: 920px;
+      border-radius: 18px;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      z-index: 100;
+    }
+
+    /* 3D Glassmorphic Beveled & Extruded Buttons */
+    .btn-glass-3d {
+      position: relative;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(20, 32, 54, 0.70) 50%, rgba(8, 14, 26, 0.90) 100%);
+      color: #e2e8f0;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-top: 1px solid rgba(255, 255, 255, 0.40);
+      border-bottom: 2px solid rgba(0, 0, 0, 0.65);
+      border-radius: 10px;
+      padding: 9px 18px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.45),
+        0 1px 0 rgba(255, 255, 255, 0.25) inset,
+        0 -1px 2px rgba(0, 0, 0, 0.5) inset;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+    }
+
+    .btn-glass-3d:hover {
+      background: linear-gradient(180deg, rgba(0, 240, 255, 0.24) 0%, rgba(14, 42, 68, 0.75) 50%, rgba(6, 20, 36, 0.92) 100%);
+      color: #ffffff;
+      border-color: rgba(0, 240, 255, 0.5);
+      border-top: 1px solid rgba(255, 255, 255, 0.6);
+      box-shadow:
+        0 6px 20px rgba(0, 240, 255, 0.3),
+        0 1px 0 rgba(255, 255, 255, 0.4) inset,
+        0 -1px 2px rgba(0, 0, 0, 0.5) inset;
+      transform: translateY(-1.5px);
+    }
+
+    .btn-glass-3d:active {
+      transform: translateY(1px);
+      box-shadow:
+        0 2px 6px rgba(0, 0, 0, 0.5),
+        0 2px 4px rgba(0, 0, 0, 0.6) inset;
+      border-top-color: rgba(0, 0, 0, 0.4);
+      border-bottom-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* 3D Extruded Black Play Button (Obsidian Glass Convex Sphere) */
+    .btn-play-3d {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      padding: 0;
+      background: radial-gradient(circle at 35% 30%, #222834 0%, #10141d 42%, #05070a 85%, #020304 100%);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-top: 1px solid rgba(255, 255, 255, 0.22);
+      border-bottom: 2px solid rgba(0, 0, 0, 0.90);
+      box-shadow:
+        0 8px 20px rgba(0, 0, 0, 0.90),
+        0 1px 1px rgba(255, 255, 255, 0.18) inset,
+        0 -3px 4px rgba(0, 0, 0, 0.85) inset;
+    }
+
+    .btn-play-3d:hover {
+      background: radial-gradient(circle at 35% 30%, #2d3444 0%, #151a26 42%, #07090e 85%, #020304 100%);
+      border-color: rgba(255, 255, 255, 0.18);
+      border-top-color: rgba(255, 255, 255, 0.30);
+      box-shadow:
+        0 10px 24px rgba(0, 0, 0, 0.95),
+        0 1px 1px rgba(255, 255, 255, 0.24) inset,
+        0 -3px 4px rgba(0, 0, 0, 0.85) inset;
+      transform: translateY(-1.5px);
+    }
+
+    .btn-play-3d:active {
+      background: radial-gradient(circle at 45% 40%, #0d1017 0%, #050608 60%, #010203 100%);
+      transform: translateY(1px);
+      box-shadow:
+        0 3px 8px rgba(0, 0, 0, 0.85),
+        0 2px 4px rgba(0, 0, 0, 0.90) inset;
+    }
+
+    .btn-play-3d.playing {
+      background: radial-gradient(circle at 35% 30%, #1e2430 0%, #0e121a 42%, #05070a 85%, #020304 100%);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-top: 1px solid rgba(255, 255, 255, 0.22);
+      border-bottom: 2px solid rgba(0, 0, 0, 0.90);
+      box-shadow:
+        0 8px 20px rgba(0, 0, 0, 0.90),
+        0 1px 1px rgba(255, 255, 255, 0.18) inset,
+        0 -3px 4px rgba(0, 0, 0, 0.85) inset;
+    }
+
+    #play-icon {
+      font-size: 15px;
+      color: #ffffff;
+      margin-left: 2px;
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.8));
+    }
+
+    .btn-play-3d.playing #play-icon {
+      color: #ffffff;
+      margin-left: 0;
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.8));
+    }
+
+    /* Timeline Section */
+    .timeline-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .timeline-times {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #ffffff;
+      letter-spacing: 1.2px;
+      font-weight: 600;
+    }
+
+    #time-current {
+      color: #ffffff;
+      font-weight: 700;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+    }
+
+    #time-duration {
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    /* Bottom Right Corner Logo */
+    .corner-logo-container {
+      position: absolute;
+      bottom: 22px;
+      right: 28px;
+      z-index: 120;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .corner-logo-img {
+      width: 46px;
+      height: 46px;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.85)) drop-shadow(0 0 12px rgba(255, 255, 255, 0.35));
+      opacity: 0.95;
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6) inset;
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #ffffff 20%, #00f0ff 70%, #0099bb 100%);
+      box-shadow: 0 0 12px #00f0ff, 0 2px 4px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      cursor: pointer;
+      transition: transform 0.12s ease;
+    }
+
+    input[type=range]::-webkit-slider-thumb:hover {
+      transform: scale(1.35);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loading State -->
+  <div id="loading-overlay">
+    <div class="loading-title">RYODAN // 4K GPU ENGINE</div>
+    <div class="loading-progress-track">
+      <div id="loading-progress-bar"></div>
+    </div>
+    <div id="loading-percent">CARGANDO SHADERS Y CAPAS 4K: 0%</div>
+  </div>
+
+  <!-- Main Viewport -->
+  <div id="canvas-container">
+    <!-- Web Margin Waves Canvas (Strictly outside 16:9 image on web borders) -->
+    <canvas id="margin-waves-left" class="web-margin-canvas"></canvas>
+    <canvas id="margin-waves-right" class="web-margin-canvas"></canvas>
+
+    <canvas id="webgl-canvas"></canvas>
+
+    <!-- Header HUD (iOS / iMac 3D Glassmorphism) -->
+    <div class="hud-header">
+      <div class="brand-cluster-3d glass-panel-3d">
+        <img class="brand-logo-img" src="./assets/ui_ryodan_logo.png" alt="RYODAN Logo">
+        <div class="brand-text-col">
+          <div class="brand-subtitle-white">Contest Entry by Blackbeard</div>
+          <div class="brand-engine-sub">Space Maeve // 4K Sovereign Engine</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Control Dock (3D Glass Panel & Beveled Extruded Buttons) -->
+    <div class="hud-dock-3d glass-panel-3d">
+      <button id="btn-play" class="btn-glass-3d btn-play-3d" title="Reproducir / Pausar (Espacio)">
+        <span id="play-icon">&#9658;</span>
+      </button>
+
+      <div class="timeline-wrapper">
+        <input type="range" id="timeline-scrub" min="0" max="100" step="0.1" value="0">
+        <div class="timeline-times">
+          <span id="time-current">00:00</span>
+          <span id="time-duration">00:40</span>
+        </div>
+      </div>
+
+      <button id="btn-scan" class="btn-glass-3d" title="Disparar escáner holográfico (Tecla S)">
+        &#9889; SCANNER
+      </button>
+
+      <button id="btn-fullscreen" class="btn-glass-3d" title="Pantalla completa 4K (Tecla F)">
+        &#9974; 4K FULLSCREEN
+      </button>
+    </div>
+
+    <!-- Bottom Right Corner Logo -->
+    <div class="corner-logo-container">
+      <img src="./assets/logo_corner.png" alt="Sovereign Logo" class="corner-logo-img">
+    </div>
+  </div>
+
+  <!-- Boot Script -->
+  <script type="module" src="./src/boot/main.js"></script>
+</body>
+</html>
