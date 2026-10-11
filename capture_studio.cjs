@@ -48,8 +48,17 @@ async function testWebStudio() {
       variantIndex: 1.45,
       dropActive: false
     };
+    if (app.audio && app.audio.audioElement) {
+      app.audio.audioElement.currentTime = 18.2;
+    }
     app.renderer.render(22.5, 0.033, energy, 24.8);
     app.hud.update(performance.now(), energy);
+    if (app.hud.dom.timelineFill) {
+      app.hud.dom.timelineFill.style.width = '45%';
+    }
+    if (app.hud.dom.scrubBar) {
+      app.hud.dom.scrubBar.value = 45;
+    }
     if (app.marginWaves) {
       app.marginWaves.update(22.5, energy);
     }

@@ -23,7 +23,8 @@ export class HudController {
       dropBadge: document.getElementById('badge-drop'),
       loadingOverlay: document.getElementById('loading-overlay'),
       loadingProgress: document.getElementById('loading-progress-bar'),
-      loadingPercent: document.getElementById('loading-percent')
+      loadingPercent: document.getElementById('loading-percent'),
+      timelineFill: document.getElementById('timeline-liquid-fill')
     };
 
     this.frameCount = 0;
@@ -49,8 +50,11 @@ export class HudController {
 
     this.dom.scrubBar.addEventListener('input', (e) => {
       this.isDraggingScrub = true;
-      const pct = parseFloat(e.target.value) / 100.0;
-      this.audio.seek(pct * (this.audio.duration || 40.17));
+      const pct = parseFloat(e.target.value);
+      if (this.dom.timelineFill) {
+        this.dom.timelineFill.style.width = `${pct}%`;
+      }
+      this.audio.seek((pct / 100.0) * (this.audio.duration || 40.17));
     });
 
     this.dom.scrubBar.addEventListener('change', () => {
@@ -126,7 +130,11 @@ export class HudController {
     this.dom.timeDuration.textContent = this.formatTime(dur);
 
     if (!this.isDraggingScrub && dur > 0) {
-      this.dom.scrubBar.value = (cur / dur) * 100.0;
+      const pct = (cur / dur) * 100.0;
+      this.dom.scrubBar.value = pct;
+      if (this.dom.timelineFill) {
+        this.dom.timelineFill.style.width = `${pct}%`;
+      }
     }
 
     // 2. Drop Badge Status

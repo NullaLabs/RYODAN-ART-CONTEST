@@ -269,43 +269,41 @@ export const CityLightsFragmentShader = `
       discard;
     }
 
+    // Synchronized color shift matching the dome
     float iridPhase = vUv.x * 5.5 + vUv.y * 4.0 - u_time * 1.2 + u_mids * 2.5 + u_echo * 2.0;
     vec3 iridescence = 0.55 + 0.45 * cos(iridPhase + vec3(0.0, 2.094, 4.188));
 
-    // Synchronized 7-color palette matching the dome
-    float palCycle = mod(u_time * 0.12 + u_echo * 0.20, 1.0);
-    vec3 c0 = vec3(0.00, 0.94, 1.00);
-    vec3 c1 = vec3(0.12, 0.45, 1.00);
-    vec3 c2 = vec3(0.65, 0.22, 1.00);
-    vec3 c3 = vec3(1.00, 0.18, 0.60);
-    vec3 c4 = vec3(1.00, 0.38, 0.20);
-    vec3 c5 = vec3(1.00, 0.82, 0.28);
-    vec3 c6 = vec3(0.10, 0.98, 0.60);
+    float palCycle = mod(u_time * 0.14 + u_echo * 0.25, 1.0);
+    vec3 p1 = vec3(0.28, 0.88, 0.68);
+    vec3 p2 = vec3(0.18, 0.78, 0.98);
+    vec3 p3 = vec3(0.72, 0.46, 0.98);
+    vec3 p4 = vec3(0.95, 0.72, 0.38);
 
-    float s = palCycle * 7.0;
-    float idx = floor(s);
-    float f = smoothstep(0.0, 1.0, fract(s));
     vec3 domePalette;
-    if (idx < 1.0) domePalette = mix(c0, c1, f);
-    else if (idx < 2.0) domePalette = mix(c1, c2, f);
-    else if (idx < 3.0) domePalette = mix(c2, c3, f);
-    else if (idx < 4.0) domePalette = mix(c3, c4, f);
-    else if (idx < 5.0) domePalette = mix(c4, c5, f);
-    else if (idx < 6.0) domePalette = mix(c5, c6, f);
-    else domePalette = mix(c6, c0, f);
+    if (palCycle < 0.25) domePalette = mix(p1, p2, palCycle * 4.0);
+    else if (palCycle < 0.50) domePalette = mix(p2, p3, (palCycle - 0.25) * 4.0);
+    else if (palCycle < 0.75) domePalette = mix(p3, p4, (palCycle - 0.50) * 4.0);
+    else domePalette = mix(p4, p1, (palCycle - 0.75) * 4.0);
 
-    vec3 syncedTint = mix(domePalette, iridescence, 0.40);
+    vec3 syncedTint = mix(domePalette, iridescence, 0.45);
 
     // Highly responsive pulse to beats (kick, snare, mids)
-    float pulse = 0.90 + 0.38 * u_kick + 0.28 * u_snare + 0.22 * u_mids + 0.15 * u_echo;
-    float aG = clamp(pow(lGreen.a, 0.52) * 1.05 * pulse, 0.0, 1.0);
-    float aW = clamp(pow(lWhite.a, 0.52) * 1.05 * pulse, 0.0, 1.0);
+    float pulse = 0.85 + 0.40 * u_kick + 0.30 * u_snare + 0.25 * u_mids + 0.20 * u_echo;
 
-    vec3 colG = syncedTint * (1.25 + 0.25 * u_echo + 0.25 * u_kick);
-    vec3 colW = mix(vec3(1.0, 0.92, 0.65), syncedTint, 0.30) * (1.15 + 0.30 * u_kick);
+    // CAPA 5: "debe verse como antes"
+    float aG = clamp(pow(lGreen.a, 0.50) * 0.95 * pulse, 0.0, 1.0);
+    vec3 colG = syncedTint * (1.20 + 0.30 * u_echo + 0.35 * u_kick);
+
+    // CAPA 4: "debe verse y apagarse y encenderse cada 8 segundos"
+    // 8-second periodic cycle: smoothly turns on, shines, turns off, repeats every 8s
+    float cycle8 = mod(u_time, 8.0);
+    float onOff4 = smoothstep(0.0, 0.8, cycle8) * (1.0 - smoothstep(4.0, 4.8, cycle8));
+
+    float aW = clamp(pow(lWhite.a, 0.52) * 1.05 * pulse * onOff4, 0.0, 1.0);
+    vec3 colW = mix(vec3(1.0, 0.98, 0.88), syncedTint, 0.40) * (1.25 + 0.45 * u_kick);
 
     float outA = clamp(max(aG, aW), 0.0, 1.0);
-    vec3 outRgb = mix(colG, colW, clamp(aW / max(aG + aW, 0.001), 0.0, 1.0));
+    vec3 outRgb = (aW > 0.001) ? mix(colG, colW, clamp(aW / max(aG + aW, 0.001), 0.0, 1.0)) : colG;
 
     gl_FragColor = vec4(outRgb, outA);
   }
