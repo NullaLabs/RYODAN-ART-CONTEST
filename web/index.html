@@ -836,6 +836,154 @@
       #fs-glass-window {
         border-radius: 14px;
       }
+
+      #right-margin-downloads {
+        top: 8px;
+        gap: 5px;
+      }
+
+      .dl-card {
+        padding: 4px;
+        border-radius: 7px;
+        gap: 3px;
+      }
+
+      .dl-btn-label {
+        font-size: 6.5px;
+        letter-spacing: 0.5px;
+      }
+
+      .dl-subbtn {
+        font-size: 6px;
+        padding: 3px 2px;
+        border-radius: 4px;
+      }
+
+      .dl-audio-only-btn {
+        padding: 5px 4px;
+        font-size: 6.5px;
+        letter-spacing: 0.5px;
+        border-radius: 7px;
+      }
+    }
+
+    /* Right Margin Top-Corner Download Stack (Strictly outside video in right margin) */
+    #right-margin-downloads {
+      position: absolute;
+      top: 16px;
+      right: 6px;
+      z-index: 130;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: auto;
+    }
+
+    .dl-card {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 5px;
+      padding: 6px;
+      border-radius: 10px;
+      text-decoration: none;
+      color: #e2e8f0;
+      cursor: pointer;
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+      width: 100%;
+    }
+
+    a.dl-card:hover {
+      border-color: rgba(0, 240, 255, 0.55);
+      box-shadow:
+        0 8px 22px rgba(0, 240, 255, 0.25),
+        0 1px 0 rgba(255, 255, 255, 0.4) inset;
+      transform: translateY(-1.5px);
+    }
+
+    .dl-thumb-wrap {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #020409;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      position: relative;
+    }
+
+    .dl-thumb-media {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      pointer-events: none;
+    }
+
+    .dl-btn-label {
+      font-size: 8.5px;
+      font-weight: 800;
+      letter-spacing: 0.9px;
+      color: #ffffff;
+      text-align: center;
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+      line-height: 1.2;
+    }
+
+    .dl-card-gif {
+      cursor: default;
+    }
+
+    .dl-gif-subbtns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+      width: 100%;
+    }
+
+    .dl-subbtn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 3px;
+      border-radius: 6px;
+      font-size: 7.5px;
+      font-weight: 800;
+      letter-spacing: 0.6px;
+      color: #e2e8f0;
+      text-decoration: none;
+      text-transform: uppercase;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(16, 28, 48, 0.82) 100%);
+      border: 1px solid rgba(0, 240, 255, 0.28);
+      border-top: 1px solid rgba(255, 255, 255, 0.38);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .dl-subbtn:hover {
+      background: linear-gradient(180deg, rgba(0, 240, 255, 0.32) 0%, rgba(12, 40, 68, 0.92) 100%);
+      color: #ffffff;
+      border-color: rgba(0, 240, 255, 0.75);
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .dl-audio-only-btn {
+      width: 100%;
+      padding: 8px 6px;
+      font-size: 8.5px;
+      font-weight: 800;
+      letter-spacing: 0.9px;
+      border-radius: 10px;
+      text-decoration: none;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   </style>
 </head>
@@ -887,6 +1035,42 @@
           <div class="brand-subtitle-white">Contest Entry by Blackbeard</div>
         </div>
       </div>
+    </div>
+
+    <!-- Top-Right Margin Download Stack (Strictly in the right margin outside the video) -->
+    <div id="right-margin-downloads">
+      <!-- 1. Download Original Image -->
+      <a href="./assets/downloads/RYODAN_SPACE_MAEVE_ORIGINAL.png" download="RYODAN_SPACE_MAEVE_ORIGINAL.png" class="dl-card glass-panel-3d" title="Download Original Artwork Image (2668x1500 PNG)">
+        <div class="dl-thumb-wrap">
+          <img src="./assets/downloads/thumb_original.webp" alt="Original Image" class="dl-thumb-media">
+        </div>
+        <span class="dl-btn-label">&#11015; DOWNLOAD IMAGE</span>
+      </a>
+
+      <!-- 2. Download Video (with 3-second looping video preview) -->
+      <a href="./assets/downloads/RYODAN_SPACE_MAEVE_4K_VIDEO.mp4" download="RYODAN_SPACE_MAEVE_4K_VIDEO.mp4" class="dl-card glass-panel-3d" title="Download 4K Video (MP4)">
+        <div class="dl-thumb-wrap">
+          <video src="./assets/downloads/preview_3s.mp4" autoplay loop muted playsinline class="dl-thumb-media"></video>
+        </div>
+        <span class="dl-btn-label">&#11015; DOWNLOAD VIDEO</span>
+      </a>
+
+      <!-- 3. Download GIF (with animated GIF preview & 2 sub-buttons: MAX HD / LIGHT) -->
+      <div class="dl-card dl-card-gif glass-panel-3d">
+        <div class="dl-thumb-wrap">
+          <img src="./assets/downloads/preview_gif.gif" alt="GIF Preview" class="dl-thumb-media">
+        </div>
+        <span class="dl-btn-label">&#11015; DOWNLOAD GIF</span>
+        <div class="dl-gif-subbtns">
+          <a href="./assets/downloads/RYODAN_SPACE_MAEVE_GIF_MAX_HD.gif" download="RYODAN_SPACE_MAEVE_GIF_MAX_HD.gif" class="dl-subbtn" title="Download Max Quality GIF (1080p Vector)">MAX HD</a>
+          <a href="./assets/downloads/RYODAN_SPACE_MAEVE_GIF_LIGHT.gif" download="RYODAN_SPACE_MAEVE_GIF_LIGHT.gif" class="dl-subbtn" title="Download Light GIF (<15 MB)">LIGHT</a>
+        </div>
+      </div>
+
+      <!-- 4. Download Audio (Single button only) -->
+      <a href="./assets/audio/space_maeve.m4a" download="RYODAN_SPACE_MAEVE_AUDIO.m4a" class="dl-audio-only-btn btn-glass-3d" title="Download Original Audio Track (M4A)">
+        &#11015; DOWNLOAD AUDIO
+      </a>
     </div>
 
     <!-- Bottom Control Dock (3D Glass Panel & Beveled Extruded Buttons) -->

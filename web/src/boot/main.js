@@ -95,7 +95,7 @@ class RyodanStudioApp {
     const isCompact = width <= 1024 || height <= 540;
 
     // Windowed: reserve lateral margin space. Compact/Mobile: reserve bottom bar clearance so dock never covers artwork
-    const reserveMargin = isFs ? 0 : ((width >= 1200) ? 260 : 0);
+    const reserveMargin = isFs ? 0 : ((width >= 1200) ? 280 : (width >= 740 ? 200 : 160));
     const padX = isFs ? (isCompact ? 20 : 56) : 0;
     const padTop = isFs ? (isCompact ? 12 : 48) : (isCompact ? 6 : 0);
     const padBottom = isFs ? (isCompact ? 50 : 120) : (isCompact ? 42 : 0);
@@ -114,6 +114,21 @@ class RyodanStudioApp {
 
     this.canvas.style.width = `${Math.floor(renderW)}px`;
     this.canvas.style.height = `${Math.floor(renderH)}px`;
+
+    // Position #right-margin-downloads strictly inside the right margin outside the video
+    const rightDownloads = document.getElementById('right-margin-downloads');
+    if (rightDownloads) {
+      const canvasRightEdge = Math.floor((width + renderW) / 2);
+      const rightMarginSpace = Math.max(0, Math.floor(width - canvasRightEdge));
+      if (rightMarginSpace >= 62) {
+        rightDownloads.style.display = 'flex';
+        rightDownloads.style.left = `${canvasRightEdge + 6}px`;
+        rightDownloads.style.right = 'auto';
+        rightDownloads.style.width = `${Math.max(56, rightMarginSpace - 12)}px`;
+      } else {
+        rightDownloads.style.display = 'none';
+      }
+    }
 
     // Internal buffer size: lock to exact native harmonic resolution (2668x1500 or 3840x2160)
     // Eliminates fractional scanline Moiré interference and provides true SSAA supersampling on 1080p/1440p screens
