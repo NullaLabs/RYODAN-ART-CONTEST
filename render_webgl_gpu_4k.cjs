@@ -176,28 +176,57 @@ async function renderWebGL4KVideo() {
   const size2K = (fs.statSync(outMp4_2K).size / (1024 * 1024)).toFixed(2);
   console.log(`✅ [2K QHD ULTRA-LIGHT MASTER COMPLETE]: ${outMp4_2K} (${size2K} MB)`);
 
-  console.log('[6/6] Generating High-Definition Subpixel GIF (960x540, Compact Bayer Scale 5)...');
+  console.log('[6/6] Generating Transcendental Harmonic HD GIFs (1334x750 1:2 Native Scanline Ratio, 18 FPS)...');
+  const outGifTranscendental = 'E:\\RYODAN_STUDIO\\exports\\RYODAN_SPACE_MAEVE_TRANSCENDENTAL_HD.gif';
+  const tempRgb = 'E:\\RYODAN_STUDIO\\exports\\temp_hd_rgb.nut';
+  const tempPal = 'E:\\RYODAN_STUDIO\\exports\\temp_hd_pal.nut';
   const palettePath = 'E:\\RYODAN_STUDIO\\exports\\palette.png';
-  await new Promise(resolve => {
-    const p1 = spawn(ffmpegExe, [
-      '-y', '-ss', '22.5', '-t', '6.0', '-i', outMp4_4K,
-      '-vf', 'fps=15,scale=960:540:flags=lanczos,hqdn3d=3:2:6:4,palettegen=max_colors=256:stats_mode=diff',
-      '-update', '1',
-      palettePath
-    ], { stdio: 'ignore' });
-    p1.on('close', resolve);
+
+  const runFFmpeg = (args) => new Promise(resolve => {
+    const p = spawn(ffmpegExe, args, { stdio: 'ignore' });
+    p.on('close', resolve);
   });
-  await new Promise(resolve => {
-    const p2 = spawn(ffmpegExe, [
-      '-y', '-ss', '22.5', '-t', '6.0', '-i', outMp4_4K, '-i', palettePath,
-      '-lavfi', 'fps=15,scale=960:540:flags=lanczos,hqdn3d=3:2:6:4[x];[x][1:v]paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle',
-      outGif
-    ], { stdio: 'ignore' });
-    p2.on('close', resolve);
-  });
-  if (fs.existsSync(palettePath)) fs.unlinkSync(palettePath);
+
+  // Pass 1: Exact 1:2 Harmonic Downsample (2668x1500 -> 1334x750) with full_chroma_int Lanczos + micro-unsharp
+  await runFFmpeg([
+    '-y', '-ss', '22.5', '-t', '6.0', '-i', outMp4_4K,
+    '-vf', 'fps=18,scale=1334:750:flags=lanczos+accurate_rnd+full_chroma_int,hqdn3d=1.5:1.2:2.5:2.0,unsharp=3:3:0.35:3:3:0.0,format=rgb24',
+    '-c:v', 'rawvideo',
+    tempRgb
+  ]);
+
+  // Pass 2A: Per-Frame 256-Color Dynamic Local Palettes (108 * 256 = 27,648 dynamic colors!)
+  await runFFmpeg([
+    '-y', '-i', tempRgb,
+    '-vf', 'palettegen=max_colors=256:stats_mode=single',
+    '-c:v', 'rawvideo',
+    tempPal
+  ]);
+  await runFFmpeg([
+    '-y', '-i', tempRgb, '-i', tempPal,
+    '-lavfi', '[0:v][1:v]paletteuse=new=1:dither=bayer:bayer_scale=4:diff_mode=rectangle',
+    outGifTranscendental
+  ]);
+
+  // Pass 2B: Full-Spectrum Global Palette + Bayer Scale 3 + Rectangle Delta Transparency
+  await runFFmpeg([
+    '-y', '-i', tempRgb,
+    '-vf', 'palettegen=max_colors=256:stats_mode=full:reserve_transparent=1',
+    '-update', '1',
+    palettePath
+  ]);
+  await runFFmpeg([
+    '-y', '-i', tempRgb, '-i', palettePath,
+    '-lavfi', '[0:v][1:v]paletteuse=dither=bayer:bayer_scale=3:diff_mode=rectangle',
+    outGif
+  ]);
+
+  for (const f of [tempRgb, tempPal, palettePath]) {
+    if (fs.existsSync(f)) fs.unlinkSync(f);
+  }
   const sizeGif = (fs.statSync(outGif).size / (1024 * 1024)).toFixed(2);
-  console.log(`✅ [HD SUBPIXEL GIF COMPLETE]: ${outGif} (${sizeGif} MB) in ${((Date.now() - tStart) / 1000).toFixed(1)}s total.`);
+  const sizeGifTrans = (fs.statSync(outGifTranscendental).size / (1024 * 1024)).toFixed(2);
+  console.log(`✅ [HARMONIC HD GIF COMPLETE]: ${outGif} (${sizeGif} MB) & ${outGifTranscendental} (${sizeGifTrans} MB) in ${((Date.now() - tStart) / 1000).toFixed(1)}s total.`);
 }
 
 renderWebGL4KVideo().catch(err => {
