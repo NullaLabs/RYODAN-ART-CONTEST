@@ -159,10 +159,12 @@ export class AudioEngine {
     const rawMids = getAverageInRange(StudioConfig.audio.bands.mids.min, StudioConfig.audio.bands.mids.max);
     const rawHighs = getAverageInRange(StudioConfig.audio.bands.highs.min, StudioConfig.audio.bands.highs.max);
 
+    const dtScale = Math.min(2.5, Math.max(0.25, (delta || 0.01667) * 60.0));
     const smoothBand = (current, target, attack = 0.88, decay = 0.16) => {
-      return (target > current)
-        ? current * (1.0 - attack) + target * attack
-        : current * (1.0 - decay) + target * decay;
+      const k = (target > current)
+        ? 1.0 - Math.pow(1.0 - attack, dtScale)
+        : 1.0 - Math.pow(1.0 - decay, dtScale);
+      return current + (target - current) * k;
     };
 
     this.smoothed.subBass = smoothBand(this.smoothed.subBass, rawBass, 0.92, 0.15);
@@ -193,25 +195,26 @@ export class AudioEngine {
       this.lastOnsetTime = nowSec;
       this.energy.impact = 1.0;
     } else {
-      this.energy.impact *= this.energy.dropActive ? 0.91 : 0.89;
+      this.energy.impact *= Math.pow(this.energy.dropActive ? 0.91 : 0.89, dtScale);
     }
 
     if (highFlux > 0.08) {
       this.energy.snare = Math.min(1.0, 0.78 + this.energy.highs * 0.22);
     } else {
-      this.energy.snare *= this.energy.dropActive ? 0.86 : 0.82;
+      this.energy.snare *= Math.pow(this.energy.dropActive ? 0.86 : 0.82, dtScale);
     }
 
     // Grit detection (noisy/broken high-transient burst for signal interference)
     if (highFlux > 0.075) {
       this.energy.grit = Math.min(1.0, (highFlux - 0.075) * 8.0 + this.energy.highs * 0.4);
     } else {
-      this.energy.grit = (this.energy.grit || 0) * 0.80;
+      this.energy.grit = (this.energy.grit || 0) * Math.pow(0.80, dtScale);
     }
 
-    // Delayed Wave Echo for Dome & City Lights (Call-and-Response)
-    this.echoHistory.push(this.energy.impact);
-    this.energy.echo = this.echoHistory.shift();
+    // Zero-allocation circular ring buffer for Delayed Wave Echo
+    this.echoIdx = ((this.echoIdx || 0) + 1) & 7;
+    this.energy.echo = this.echoHistory[this.echoIdx];
+    this.echoHistory[this.echoIdx] = this.energy.impact;
 
     return this.energy;
   }

@@ -25,14 +25,17 @@ export class VisualizerRenderer {
     this.camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 10);
     this.camera.position.z = 1;
 
+    const isAutomatedOrOffline = Boolean(navigator.webdriver || (window.location && window.location.search.includes('offline=1')));
     this.renderer = new THREE.WebGLRenderer({
       canvas: this.canvas,
       antialias: false,
       powerPreference: 'high-performance',
-      preserveDrawingBuffer: true,
+      preserveDrawingBuffer: isAutomatedOrOffline,
+      depth: false,
+      stencil: false,
       alpha: false
     });
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1.0, 1.5));
+    this.renderer.setPixelRatio(1.0);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
 
     this.textureLoader = new THREE.TextureLoader();
@@ -49,6 +52,29 @@ export class VisualizerRenderer {
     };
 
     this.isLoaded = false;
+  }
+
+  fuseStaticTextures(texArray) {
+    const valid = texArray.filter((t) => t && t.image);
+    if (valid.length === 0) return null;
+    if (valid.length === 1) return valid[0];
+    const w = valid[0].image.width || 2668;
+    const h = valid[0].image.height || 1500;
+    const offCanvas = document.createElement('canvas');
+    offCanvas.width = w;
+    offCanvas.height = h;
+    const ctx = offCanvas.getContext('2d');
+    for (const t of valid) {
+      ctx.drawImage(t.image, 0, 0, w, h);
+    }
+    const fused = new THREE.CanvasTexture(offCanvas);
+    fused.colorSpace = THREE.SRGBColorSpace;
+    fused.generateMipmaps = false;
+    fused.minFilter = THREE.LinearFilter;
+    fused.magFilter = THREE.LinearFilter;
+    fused.anisotropy = this.renderer.capabilities.getMaxAnisotropy();
+    this.renderer.initTexture(fused);
+    return fused;
   }
 
   async loadAssets(onProgress) {
@@ -89,6 +115,7 @@ export class VisualizerRenderer {
     ];
 
     let loadedCount = 0;
+    const maxAnisotropy = this.renderer.capabilities.getMaxAnisotropy();
     const loadSingleWithRetry = (item, attempt = 0) => {
       return new Promise((resolve, reject) => {
         this.textureLoader.load(
@@ -98,6 +125,8 @@ export class VisualizerRenderer {
             tex.generateMipmaps = false;
             tex.minFilter = THREE.LinearFilter;
             tex.magFilter = THREE.LinearFilter;
+            tex.anisotropy = maxAnisotropy;
+            this.renderer.initTexture(tex);
             this.textures[item.key] = tex;
             loadedCount++;
             if (onProgress) onProgress(loadedCount / list.length);
@@ -263,11 +292,14 @@ export class VisualizerRenderer {
     neomarsMesh.position.z = 0.055;
     this.scene.add(neomarsMesh);
 
-    // [11], [12] MAVE + [13], [14] RYODAN (All 4 layers!)
-    addStaticPlane(this.textures.mave, 0.060, 1.0);
-    addStaticPlane(this.textures.maveCopy, 0.061, 1.0);
-    addStaticPlane(this.textures.ryodan, 0.065, 1.0);
-    addStaticPlane(this.textures.ryodanCopy, 0.066, 1.0);
+    // [11], [12] MAVE + [13], [14] RYODAN (Fused into 1 GPU pass to eliminate 3 full-screen 4K overdraw passes)
+    const fusedLogosTex = this.fuseStaticTextures([
+      this.textures.mave,
+      this.textures.maveCopy,
+      this.textures.ryodan,
+      this.textures.ryodanCopy
+    ]);
+    addStaticPlane(fusedLogosTex, 0.065, 1.0);
 
     // [18] & [19] COLORED CITY LIGHTS SHADER (5color luces & 4Copia)
     this.materials.cityLights = new THREE.ShaderMaterial({
@@ -327,9 +359,12 @@ export class VisualizerRenderer {
     cartelMesh.position.z = 0.080;
     this.scene.add(cartelMesh);
 
-    // [22], [23] Credits Handles: @KREATOSVORTEX & @STEVEBLACKBEARD (same authentic typography, crisp white)
-    this.materials.handle1 = addStaticPlane(this.textures.handle1, 0.082, 1.0);
-    this.materials.handle2 = addStaticPlane(this.textures.handle2, 0.084, 1.0);
+    // [22], [23] Credits Handles: @KREATOSVORTEX & @STEVEBLACKBEARD (Fused into 1 GPU pass)
+    const fusedHandlesTex = this.fuseStaticTextures([
+      this.textures.handle1,
+      this.textures.handle2
+    ]);
+    this.materials.handle1 = addStaticPlane(fusedHandlesTex, 0.083, 1.0);
 
     // [24] Rotating Vortex Emblem on right side of credits panel
     this.materials.emblem = new THREE.ShaderMaterial({

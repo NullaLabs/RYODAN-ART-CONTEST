@@ -173,15 +173,20 @@ export class WebMarginWavesController {
     ctx.fillStyle = sweepGrad;
     ctx.fillRect(0, 0, w, h);
 
-    // Luminous glass accent seam border adjacent to the 16:9 canvas
+    // Luminous glass accent seam border adjacent to the 16:9 canvas (2-pass GPU glow, zero CPU shadowBlur stall)
     const borderX = isRight ? 0.5 : w - 0.5;
     ctx.beginPath();
     ctx.moveTo(borderX, 0);
     ctx.lineTo(borderX, h);
+    ctx.lineWidth = 8 + highs * 10;
+    ctx.strokeStyle = ambientColor1.replace('rgb', 'rgba').replace(')', `, ${0.14 + highs * 0.16})`);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(borderX, 0);
+    ctx.lineTo(borderX, h);
     ctx.lineWidth = 1.5;
-    ctx.strokeStyle = ambientColor1.replace('rgb', 'rgba').replace(')', `, ${0.45 + highs * 0.40})`);
-    ctx.shadowColor = ambientColor1;
-    ctx.shadowBlur = 12 + highs * 14;
+    ctx.strokeStyle = ambientColor1.replace('rgb', 'rgba').replace(')', `, ${0.55 + highs * 0.40})`);
     ctx.stroke();
 
     ctx.restore();

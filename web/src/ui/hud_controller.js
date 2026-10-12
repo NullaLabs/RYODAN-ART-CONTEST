@@ -30,6 +30,9 @@ export class HudController {
     this.frameCount = 0;
     this.lastFpsUpdate = 0;
     this.isDraggingScrub = false;
+    this.lastCurStr = '';
+    this.lastDurStr = '';
+    this.lastDropState = null;
 
     this.bindEvents();
   }
@@ -123,25 +126,36 @@ export class HudController {
   }
 
   update(now, energy) {
-    // 1. Time & Scrub Update
+    // 1. Time & Scrub Update (diff-cached to prevent 60Hz DOM layout reflows)
     const cur = this.audio.currentTime;
     const dur = this.audio.duration;
-    this.dom.timeCurrent.textContent = this.formatTime(cur);
-    this.dom.timeDuration.textContent = this.formatTime(dur);
+    const curStr = this.formatTime(cur);
+    const durStr = this.formatTime(dur);
+    if (curStr !== this.lastCurStr) {
+      this.lastCurStr = curStr;
+      this.dom.timeCurrent.textContent = curStr;
+    }
+    if (durStr !== this.lastDurStr) {
+      this.lastDurStr = durStr;
+      this.dom.timeDuration.textContent = durStr;
+    }
 
     if (!this.isDraggingScrub && dur > 0) {
       const pct = (cur / dur) * 100.0;
       this.dom.scrubBar.value = pct;
       if (this.dom.timelineFill) {
-        this.dom.timelineFill.style.width = `${pct}%`;
+        this.dom.timelineFill.style.width = `${pct.toFixed(2)}%`;
       }
     }
 
-    // 2. Drop Badge Status
-    if (energy.dropActive) {
-      if (this.dom.dropBadge) { this.dom.dropBadge.textContent = 'DROP ACTIVE'; this.dom.dropBadge.className = 'badge active'; }
-    } else {
-      if (this.dom.dropBadge) { this.dom.dropBadge.textContent = 'PRE-BUILD'; this.dom.dropBadge.className = 'badge pre-drop'; }
+    // 2. Drop Badge Status (diff-cached)
+    const isDrop = Boolean(energy.dropActive);
+    if (isDrop !== this.lastDropState) {
+      this.lastDropState = isDrop;
+      if (this.dom.dropBadge) {
+        this.dom.dropBadge.textContent = isDrop ? 'DROP ACTIVE' : 'PRE-BUILD';
+        this.dom.dropBadge.className = isDrop ? 'badge active' : 'badge pre-drop';
+      }
     }
 
     // 4. FPS Counter

@@ -74,10 +74,12 @@ class RyodanStudioApp {
     this.canvas.style.width = `${Math.floor(renderW)}px`;
     this.canvas.style.height = `${Math.floor(renderH)}px`;
 
-    // Internal buffer size for 4K crisp fidelity
-    // When in high-DPI or 4K screen, render target can scale up to 3840x2160
-    const dpr = Math.min(window.devicePixelRatio || 1.0, 1.5);
-    this.renderer.resize(renderW * dpr, renderH * dpr);
+    // Internal buffer size: lock to exact native harmonic resolution (2668x1500 or 3840x2160)
+    // Eliminates fractional scanline Moiré interference and provides true SSAA supersampling on 1080p/1440p screens
+    const physicalW = renderW * (window.devicePixelRatio || 1.0);
+    const targetInternalW = physicalW > 2800 ? 3840 : 2668;
+    const targetInternalH = physicalW > 2800 ? 2160 : 1500;
+    this.renderer.resize(targetInternalW, targetInternalH);
 
     // Update margin canvas geometry to align exactly with new canvas bounds
     if (this.marginWaves) {
