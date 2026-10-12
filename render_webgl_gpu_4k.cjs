@@ -190,7 +190,7 @@ async function renderWebGL4KVideo() {
   // Pass 1: Exact 1:2 Harmonic Downsample (2668x1500 -> 1334x750) with full_chroma_int Lanczos + micro-unsharp
   await runFFmpeg([
     '-y', '-ss', '22.5', '-t', '6.0', '-i', outMp4_4K,
-    '-vf', 'fps=18,scale=1334:750:flags=lanczos+accurate_rnd+full_chroma_int,hqdn3d=1.5:1.2:2.5:2.0,unsharp=3:3:0.35:3:3:0.0,format=rgb24',
+    '-an', '-vf', 'fps=18,scale=1334:750:flags=lanczos+accurate_rnd+full_chroma_int,hqdn3d=1.5:1.2:2.5:2.0,unsharp=3:3:0.35:3:3:0.0,format=rgb24',
     '-c:v', 'rawvideo',
     tempRgb
   ]);
