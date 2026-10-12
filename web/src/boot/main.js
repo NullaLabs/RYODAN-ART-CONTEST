@@ -72,7 +72,26 @@ class RyodanStudioApp {
 
     console.log("🚀 Assets and Shaders Loaded. Commencing GPU Loop at 60 FPS.");
 
-    // 4. Start Render Loop
+    // 4. Auto-start music if launched from README Play link (?autoplay=1)
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('autoplay') === '1') {
+      const dockWrap = document.getElementById('bottom-dock-wrap');
+      const dockArrow = document.getElementById('dock-tab-arrow');
+      if (dockWrap) dockWrap.classList.add('open');
+      if (dockArrow) dockArrow.innerHTML = '&#9660;';
+
+      const tryAutoPlay = () => {
+        if (!this.audio.isPlaying) {
+          const playing = this.audio.toggle();
+          this.hud.updatePlayState(playing);
+        }
+      };
+      setTimeout(tryAutoPlay, 200);
+      window.addEventListener('pointerdown', tryAutoPlay, { once: true });
+      window.addEventListener('keydown', tryAutoPlay, { once: true });
+    }
+
+    // 5. Start Render Loop
     this.lastTime = performance.now();
     requestAnimationFrame((t) => this.tick(t));
   }

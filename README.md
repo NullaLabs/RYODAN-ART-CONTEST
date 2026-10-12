@@ -3,14 +3,14 @@
 > *Contest Entry by Blackbeard // Ethernium Sovereign Web*
 
 <div align="center">
-  <a href="https://nullalabs.github.io/RYODAN-ART-CONTEST/">
+  <a href="https://nullalabs.github.io/RYODAN-ART-CONTEST/?autoplay=1" title="Click Play to Launch 4K Studio with Audio">
     <img src="./web/assets/downloads/ryodan-space-maeve-vector.svg" alt="RYODAN // SPACE MAEVE — 4K Sovereign Audio-Reactive WebGL Studio" width="100%" />
   </a>
 </div>
 
-🌐 **Live Interactive 4K Studio (Permanent GitHub CDN Link):**  
-👉 **[RYODAN-ART-CONTEST // 4K SOVEREIGN AUDIO-REACTIVE STUDIO](https://nullalabs.github.io/RYODAN-ART-CONTEST/)**  
-⚡ **Mirror Direct Tunnel:** **[RYODAN-ART-CONTEST (Live Tunnel)](https://indicators-hobbies-intelligence-publishers.trycloudflare.com/)**
+🌐 **Live Interactive 4K Studio (Click to Play with Music):**  
+👉 **[▶️ PLAY RYODAN-ART-CONTEST // 4K SOVEREIGN AUDIO-REACTIVE STUDIO](https://nullalabs.github.io/RYODAN-ART-CONTEST/?autoplay=1)**  
+⚡ **Mirror Direct Tunnel:** **[RYODAN-ART-CONTEST (Live Tunnel)](https://indicators-hobbies-intelligence-publishers.trycloudflare.com/?autoplay=1)**
 
 ---
 
