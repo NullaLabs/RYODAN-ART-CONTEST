@@ -26,9 +26,15 @@ class RyodanStudioApp {
     // 1. Initialize Audio
     await this.audio.init();
 
-    // 2. Setup Responsive Canvas Resize
+    // 2. Setup Responsive Canvas Resize & Mobile Orientation Handling
     this.handleResize();
     window.addEventListener('resize', () => this.handleResize());
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', () => this.handleResize());
+    }
+    window.addEventListener('orientationchange', () => {
+      setTimeout(() => this.handleResize(), 120);
+    });
     document.addEventListener('fullscreenchange', () => {
       document.body.classList.toggle('fs-mode', !!document.fullscreenElement);
       this.handleResize();
@@ -48,18 +54,19 @@ class RyodanStudioApp {
 
   handleResize() {
     const container = document.getElementById('canvas-container');
-    const width = container.clientWidth;
-    const height = container.clientHeight;
+    const width = window.innerWidth || container.clientWidth;
+    const height = window.innerHeight || container.clientHeight;
 
     const isFs = document.body.classList.contains('fs-mode');
+    const isCompact = width <= 1024 || height <= 540;
 
-    // Windowed: reserve lateral margin space. Fullscreen: glass-window frame with padding on every side
+    // Windowed: reserve lateral margin space. Compact/Mobile: reserve bottom bar clearance so dock never covers artwork
     const reserveMargin = isFs ? 0 : ((width >= 1200) ? 260 : 0);
-    const padX = isFs ? 56 : 0;
-    const padTop = isFs ? 48 : 0;
-    const padBottom = isFs ? 120 : 0;
-    const availableW = Math.max(400, width - reserveMargin - padX * 2);
-    const availableH = Math.max(300, height - padTop - padBottom);
+    const padX = isFs ? (isCompact ? 20 : 56) : 0;
+    const padTop = isFs ? (isCompact ? 12 : 48) : (isCompact ? 6 : 0);
+    const padBottom = isFs ? (isCompact ? 50 : 120) : (isCompact ? 42 : 0);
+    const availableW = Math.max(240, width - reserveMargin - padX * 2);
+    const availableH = Math.max(180, height - padTop - padBottom);
 
     // Preserve 16:9 / native artwork aspect ratio cleanly
     const nativeRatio = StudioConfig.canvas.aspectRatio;
