@@ -134,6 +134,15 @@ class RyodanStudioApp {
     this.canvas.style.width = `${Math.floor(renderW)}px`;
     this.canvas.style.height = `${Math.floor(renderH)}px`;
 
+    // Sync interactive artwork handles overlay (@KREATOSVORTEX & @STEVEBLACKBEARD) with exact canvas bounds
+    const interactiveOverlay = document.getElementById('canvas-interactive-overlay');
+    if (interactiveOverlay) {
+      interactiveOverlay.style.left = `${this.canvas.offsetLeft}px`;
+      interactiveOverlay.style.top = `${this.canvas.offsetTop}px`;
+      interactiveOverlay.style.width = `${this.canvas.offsetWidth}px`;
+      interactiveOverlay.style.height = `${this.canvas.offsetHeight}px`;
+    }
+
     // Size #right-drawer-wrap cleanly anchored to right: 0
     const rightDrawerWrap = document.getElementById('right-drawer-wrap');
     if (rightDrawerWrap) {
