@@ -1,17 +1,19 @@
-# RYODAN CONTEST by Ethernium
+# RYODAN-ART-CONTEST by Ethernium
 > **4K Ultra-Fidelity Sovereign Audio-Reactive Web Visualizer Engine**  
 > *Contest Entry by Blackbeard // Ethernium Sovereign Web*
 
-🌐 **Live Interactive 4K Studio (Public Link):**  
-👉 **[RYODAN-ART-CONTEST // 4K SOVEREIGN AUDIO-REACTIVE STUDIO](https://indicators-hobbies-intelligence-publishers.trycloudflare.com/)**
+🌐 **Live Interactive 4K Studio (Permanent GitHub CDN Link):**  
+👉 **[RYODAN-ART-CONTEST // 4K SOVEREIGN AUDIO-REACTIVE STUDIO](https://nullalabs.github.io/RYODAN-ART-CONTEST/)**  
+⚡ **Mirror Direct Tunnel:** **[RYODAN-ART-CONTEST (Live Tunnel)](https://indicators-hobbies-intelligence-publishers.trycloudflare.com/)**
 
 ---
 
 ## ⚡ Overview
 
-**RYODAN CONTEST by Ethernium** is a high-performance, local-first WebGL audio visualizer engineered with Three.js and custom GLSL shaders. It renders a complete 25-layer stacked composite directly in real-time at 60–144+ FPS, maintaining full 4K UHD fidelity with zero CDN dependencies.
+**RYODAN-ART-CONTEST by Ethernium** is a high-performance, local-first WebGL audio visualizer engineered with Three.js and custom GLSL shaders. It renders a complete 25-layer stacked composite directly in real-time at 60–144+ FPS, maintaining full 4K UHD fidelity with zero CDN dependencies.
 
-- **Live Web Experience:** [RYODAN-ART-CONTEST](https://indicators-hobbies-intelligence-publishers.trycloudflare.com/)
+- **Live Web Experience (GitHub Pages CDN):** [https://nullalabs.github.io/RYODAN-ART-CONTEST/](https://nullalabs.github.io/RYODAN-ART-CONTEST/)
+- **Live Web Experience (Cloudflare Mirror):** [https://indicators-hobbies-intelligence-publishers.trycloudflare.com/](https://indicators-hobbies-intelligence-publishers.trycloudflare.com/)
 - **Visuals:** 25-Layer Cyberpunk PSD Stack (Diosa Cibernética, Floating City, Dome Ecosystem, Aviation Beacons, HUD, Katakana & MIA Typography, iOS Glass Credits Cartel)
 - **Engine:** Ethernium Sovereign Web GLSL Architecture
 
