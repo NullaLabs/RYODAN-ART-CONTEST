@@ -79,6 +79,30 @@ export class HudController {
         this.renderer.triggerHologramScan();
       }
     });
+
+    const dlTab = document.getElementById('downloads-drawer-tab');
+    const dlWrap = document.getElementById('right-drawer-wrap');
+    const dlArrow = document.getElementById('dl-tab-arrow');
+    if (dlTab && dlWrap) {
+      dlTab.addEventListener('click', () => {
+        const isOpen = dlWrap.classList.toggle('open');
+        if (dlArrow) {
+          dlArrow.innerHTML = isOpen ? '&#9654;' : '&#9664;';
+        }
+      });
+    }
+
+    const dockTab = document.getElementById('dock-drawer-tab');
+    const dockWrap = document.getElementById('bottom-dock-wrap');
+    const dockArrow = document.getElementById('dock-tab-arrow');
+    if (dockTab && dockWrap) {
+      dockTab.addEventListener('click', () => {
+        const isOpen = dockWrap.classList.toggle('open');
+        if (dockArrow) {
+          dockArrow.innerHTML = isOpen ? '&#9660;' : '&#9650;';
+        }
+      });
+    }
   }
 
   updatePlayState(isPlaying) {

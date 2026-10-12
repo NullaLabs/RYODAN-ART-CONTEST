@@ -290,20 +290,30 @@
       text-shadow: 0 0 12px rgba(0, 255, 157, 0.6);
     }
 
-    /* Bottom Control Dock (3D iMac Glass) */
-    .hud-dock-3d {
+    /* Bottom Control Dock Wrapper & Retractable Tab (Hidden below bottom border by default) */
+    #bottom-dock-wrap {
       position: absolute;
-      bottom: 22px;
+      bottom: 0;
       left: 50%;
-      transform: translateX(-50%);
+      transform: translate(-50%, 100%);
       width: calc(100% - 48px);
       max-width: 920px;
+      z-index: 140;
+      transition: transform 0.34s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: auto;
+    }
+
+    #bottom-dock-wrap.open {
+      transform: translate(-50%, -18px);
+    }
+
+    .hud-dock-3d {
+      width: 100%;
       border-radius: 18px;
       padding: 12px 24px;
       display: flex;
       align-items: center;
       gap: 18px;
-      z-index: 100;
     }
 
     /* 3D Glassmorphic Beveled & Extruded Buttons */
@@ -770,10 +780,16 @@
         letter-spacing: 1px;
       }
 
-      .hud-dock-3d {
-        bottom: 5px;
+      #bottom-dock-wrap {
         width: calc(100% - 96px);
         max-width: 460px;
+      }
+
+      #bottom-dock-wrap.open {
+        transform: translate(-50%, -6px);
+      }
+
+      .hud-dock-3d {
         border-radius: 10px;
         padding: 4px 10px;
         gap: 8px;
@@ -825,20 +841,23 @@
       }
 
       #webgl-canvas {
-        margin-bottom: 36px;
+        margin-bottom: 0;
       }
 
       body.fs-mode #webgl-canvas {
         border-radius: 10px;
-        margin-bottom: 38px;
+        margin-bottom: 0;
       }
 
       #fs-glass-window {
         border-radius: 14px;
       }
 
-      #right-margin-downloads {
+      #right-drawer-wrap {
         top: 8px;
+      }
+
+      #right-margin-downloads {
         gap: 5px;
       }
 
@@ -865,18 +884,108 @@
         letter-spacing: 0.5px;
         border-radius: 7px;
       }
+
+      .drawer-tab-right {
+        padding: 7px 4px;
+        font-size: 7px;
+        letter-spacing: 1.2px;
+      }
+
+      .drawer-tab-bottom {
+        padding: 3px 14px;
+        font-size: 7px;
+        letter-spacing: 1.4px;
+      }
     }
 
-    /* Right Margin Top-Corner Download Stack (Strictly outside video in right margin) */
-    #right-margin-downloads {
+    /* Retractable Edge Tabs (Right Edge for Downloads, Bottom Center Edge for Play Bar) */
+    .drawer-tab-right {
+      position: absolute;
+      right: 100%;
+      top: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px 6px;
+      border-radius: 10px 0 0 10px;
+      border-right: none;
+      color: #00f0ff;
+      font-size: 8.5px;
+      font-weight: 800;
+      letter-spacing: 1.6px;
+      cursor: pointer;
+      pointer-events: auto;
+      transition: all 0.2s ease;
+      text-shadow: 0 0 10px rgba(0, 240, 255, 0.75);
+    }
+
+    .drawer-tab-right:hover {
+      color: #ffffff;
+      border-color: rgba(0, 240, 255, 0.65);
+      box-shadow: -4px 0 18px rgba(0, 240, 255, 0.35);
+    }
+
+    .drawer-tab-right-text {
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      transform: rotate(180deg);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .drawer-tab-bottom {
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 5px 20px;
+      border-radius: 12px 12px 0 0;
+      border-bottom: none;
+      color: #00f0ff;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      pointer-events: auto;
+      transition: all 0.2s ease;
+      text-shadow: 0 0 10px rgba(0, 240, 255, 0.75);
+      white-space: nowrap;
+    }
+
+    .drawer-tab-bottom:hover {
+      color: #ffffff;
+      border-color: rgba(0, 240, 255, 0.65);
+      box-shadow: 0 -4px 18px rgba(0, 240, 255, 0.35);
+    }
+
+    /* Right Margin Top-Corner Download Drawer (Hidden outside right window border by default) */
+    #right-drawer-wrap {
       position: absolute;
       top: 16px;
-      right: 6px;
-      z-index: 130;
+      right: 0;
+      width: 128px;
+      z-index: 150;
+      transform: translateX(100%);
+      transition: transform 0.34s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: auto;
+    }
+
+    #right-drawer-wrap.open {
+      transform: translateX(-6px);
+    }
+
+    #right-margin-downloads {
+      width: 100%;
       display: flex;
       flex-direction: column;
       gap: 8px;
-      pointer-events: auto;
     }
 
     .dl-card {
@@ -1037,68 +1146,82 @@
       </div>
     </div>
 
-    <!-- Top-Right Margin Download Stack (Strictly in the right margin outside the video) -->
-    <div id="right-margin-downloads">
-      <!-- 1. Download Original Image -->
-      <a href="./assets/downloads/RYODAN_SPACE_MAEVE_ORIGINAL.png" download="RYODAN_SPACE_MAEVE_ORIGINAL.png" class="dl-card glass-panel-3d" title="Download Original Artwork Image (2668x1500 PNG)">
-        <div class="dl-thumb-wrap">
-          <img src="./assets/downloads/thumb_original.webp" alt="Original Image" class="dl-thumb-media">
-        </div>
-        <span class="dl-btn-label">&#11015; DOWNLOAD IMAGE</span>
-      </a>
+    <!-- Top-Right Retractable Download Drawer (Hidden outside right window border by default) -->
+    <div id="right-drawer-wrap">
+      <button id="downloads-drawer-tab" class="drawer-tab-right glass-panel-3d" title="Mostrar / Ocultar Descargas">
+        <span id="dl-tab-arrow">&#9664;</span>
+        <span class="drawer-tab-right-text">DOWNLOADS</span>
+      </button>
 
-      <!-- 2. Download Video (with 3-second looping video preview) -->
-      <a href="./assets/downloads/RYODAN_SPACE_MAEVE_4K_VIDEO.mp4" download="RYODAN_SPACE_MAEVE_4K_VIDEO.mp4" class="dl-card glass-panel-3d" title="Download 4K Video (MP4)">
-        <div class="dl-thumb-wrap">
-          <video src="./assets/downloads/preview_3s.mp4" autoplay loop muted playsinline class="dl-thumb-media"></video>
-        </div>
-        <span class="dl-btn-label">&#11015; DOWNLOAD VIDEO</span>
-      </a>
+      <div id="right-margin-downloads">
+        <!-- 1. Download Original Image -->
+        <a href="./assets/downloads/RYODAN_SPACE_MAEVE_ORIGINAL.png" download="RYODAN_SPACE_MAEVE_ORIGINAL.png" class="dl-card glass-panel-3d" title="Download Original Artwork Image (2668x1500 PNG)">
+          <div class="dl-thumb-wrap">
+            <img src="./assets/downloads/thumb_original.webp" alt="Original Image" class="dl-thumb-media">
+          </div>
+          <span class="dl-btn-label">&#11015; DOWNLOAD IMAGE</span>
+        </a>
 
-      <!-- 3. Download GIF (with animated GIF preview & 2 sub-buttons: MAX HD / LIGHT) -->
-      <div class="dl-card dl-card-gif glass-panel-3d">
-        <div class="dl-thumb-wrap">
-          <img src="./assets/downloads/preview_gif.gif" alt="GIF Preview" class="dl-thumb-media">
+        <!-- 2. Download Video (with 3-second looping video preview) -->
+        <a href="./assets/downloads/RYODAN_SPACE_MAEVE_4K_VIDEO.mp4" download="RYODAN_SPACE_MAEVE_4K_VIDEO.mp4" class="dl-card glass-panel-3d" title="Download 4K Video (MP4)">
+          <div class="dl-thumb-wrap">
+            <video src="./assets/downloads/preview_3s.mp4" autoplay loop muted playsinline class="dl-thumb-media"></video>
+          </div>
+          <span class="dl-btn-label">&#11015; DOWNLOAD VIDEO</span>
+        </a>
+
+        <!-- 3. Download GIF (with animated GIF preview & 2 sub-buttons: MAX HD / LIGHT) -->
+        <div class="dl-card dl-card-gif glass-panel-3d">
+          <div class="dl-thumb-wrap">
+            <img src="./assets/downloads/preview_gif.gif" alt="GIF Preview" class="dl-thumb-media">
+          </div>
+          <span class="dl-btn-label">&#11015; DOWNLOAD GIF</span>
+          <div class="dl-gif-subbtns">
+            <a href="./assets/downloads/RYODAN_SPACE_MAEVE_GIF_MAX_HD.gif" download="RYODAN_SPACE_MAEVE_GIF_MAX_HD.gif" class="dl-subbtn" title="Download Max Quality GIF (1080p Vector)">MAX HD</a>
+            <a href="./assets/downloads/RYODAN_SPACE_MAEVE_GIF_LIGHT.gif" download="RYODAN_SPACE_MAEVE_GIF_LIGHT.gif" class="dl-subbtn" title="Download Light GIF (<15 MB)">LIGHT</a>
+          </div>
         </div>
-        <span class="dl-btn-label">&#11015; DOWNLOAD GIF</span>
-        <div class="dl-gif-subbtns">
-          <a href="./assets/downloads/RYODAN_SPACE_MAEVE_GIF_MAX_HD.gif" download="RYODAN_SPACE_MAEVE_GIF_MAX_HD.gif" class="dl-subbtn" title="Download Max Quality GIF (1080p Vector)">MAX HD</a>
-          <a href="./assets/downloads/RYODAN_SPACE_MAEVE_GIF_LIGHT.gif" download="RYODAN_SPACE_MAEVE_GIF_LIGHT.gif" class="dl-subbtn" title="Download Light GIF (<15 MB)">LIGHT</a>
-        </div>
+
+        <!-- 4. Download Audio (Single button only) -->
+        <a href="./assets/audio/space_maeve.m4a" download="RYODAN_SPACE_MAEVE_AUDIO.m4a" class="dl-audio-only-btn btn-glass-3d" title="Download Original Audio Track (M4A)">
+          &#11015; DOWNLOAD AUDIO
+        </a>
       </div>
-
-      <!-- 4. Download Audio (Single button only) -->
-      <a href="./assets/audio/space_maeve.m4a" download="RYODAN_SPACE_MAEVE_AUDIO.m4a" class="dl-audio-only-btn btn-glass-3d" title="Download Original Audio Track (M4A)">
-        &#11015; DOWNLOAD AUDIO
-      </a>
     </div>
 
-    <!-- Bottom Control Dock (3D Glass Panel & Beveled Extruded Buttons) -->
-    <div class="hud-dock-3d glass-panel-3d">
-      <button id="btn-play" class="btn-glass-3d btn-play-3d" title="Reproducir / Pausar (Espacio)">
-        <span id="play-icon">&#9658;</span>
+    <!-- Bottom Center Retractable Control Dock (Hidden below bottom window border by default) -->
+    <div id="bottom-dock-wrap">
+      <button id="dock-drawer-tab" class="drawer-tab-bottom glass-panel-3d" title="Mostrar / Ocultar Reproductor">
+        <span id="dock-tab-arrow">&#9650;</span>
+        <span>PLAYER</span>
       </button>
 
-      <div class="timeline-wrapper">
-        <div class="timeline-bar-container">
-          <div class="timeline-liquid-track">
-            <div id="timeline-liquid-fill" class="liquid-iridescent-bar"></div>
+      <div class="hud-dock-3d glass-panel-3d">
+        <button id="btn-play" class="btn-glass-3d btn-play-3d" title="Reproducir / Pausar (Espacio)">
+          <span id="play-icon">&#9658;</span>
+        </button>
+
+        <div class="timeline-wrapper">
+          <div class="timeline-bar-container">
+            <div class="timeline-liquid-track">
+              <div id="timeline-liquid-fill" class="liquid-iridescent-bar"></div>
+            </div>
+            <input type="range" id="timeline-scrub" min="0" max="100" step="0.1" value="0">
           </div>
-          <input type="range" id="timeline-scrub" min="0" max="100" step="0.1" value="0">
+          <div class="timeline-times">
+            <span id="time-current">00:00</span>
+            <span id="time-duration">00:40</span>
+          </div>
         </div>
-        <div class="timeline-times">
-          <span id="time-current">00:00</span>
-          <span id="time-duration">00:40</span>
-        </div>
+
+        <button id="btn-scan" class="btn-glass-3d" title="Disparar escáner holográfico (Tecla S)">
+          &#9889; SCANNER
+        </button>
+
+        <button id="btn-fullscreen" class="btn-glass-3d" title="Pantalla completa 4K (Tecla F)">
+          &#9974; 4K FULLSCREEN
+        </button>
       </div>
-
-      <button id="btn-scan" class="btn-glass-3d" title="Disparar escáner holográfico (Tecla S)">
-        &#9889; SCANNER
-      </button>
-
-      <button id="btn-fullscreen" class="btn-glass-3d" title="Pantalla completa 4K (Tecla F)">
-        &#9974; 4K FULLSCREEN
-      </button>
     </div>
 
     <!-- Bottom Right Corner Logo -->

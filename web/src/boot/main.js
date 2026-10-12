@@ -115,19 +115,13 @@ class RyodanStudioApp {
     this.canvas.style.width = `${Math.floor(renderW)}px`;
     this.canvas.style.height = `${Math.floor(renderH)}px`;
 
-    // Position #right-margin-downloads strictly inside the right margin outside the video
-    const rightDownloads = document.getElementById('right-margin-downloads');
-    if (rightDownloads) {
+    // Size #right-drawer-wrap to fit strictly inside the right margin space when opened, while staying anchored to right: 0
+    const rightDrawerWrap = document.getElementById('right-drawer-wrap');
+    if (rightDrawerWrap) {
       const canvasRightEdge = Math.floor((width + renderW) / 2);
       const rightMarginSpace = Math.max(0, Math.floor(width - canvasRightEdge));
-      if (rightMarginSpace >= 62) {
-        rightDownloads.style.display = 'flex';
-        rightDownloads.style.left = `${canvasRightEdge + 6}px`;
-        rightDownloads.style.right = 'auto';
-        rightDownloads.style.width = `${Math.max(56, rightMarginSpace - 12)}px`;
-      } else {
-        rightDownloads.style.display = 'none';
-      }
+      const drawerW = rightMarginSpace >= 96 ? Math.floor(rightMarginSpace - 28) : 104;
+      rightDrawerWrap.style.width = `${Math.max(68, drawerW)}px`;
     }
 
     // Internal buffer size: lock to exact native harmonic resolution (2668x1500 or 3840x2160)
