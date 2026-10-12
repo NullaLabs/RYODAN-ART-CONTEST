@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>RYODAN // ART CONTEST - 4K SOVEREIGN AUDIO-REACTIVE STUDIO</title>
+  <title>RYODAN // SPACE MAVE — ART CONTEST - 4K SOVEREIGN AUDIO-REACTIVE STUDIO</title>
   <link rel="icon" type="image/png" href="./assets/logo_corner.png">
 
   <!-- Local-First Import Map (Zero CDN Dependencies) -->
@@ -597,24 +597,44 @@
       font-weight: 600;
     }
 
-    /* Bottom Right Corner Logo */
+    /* Bottom Right Corner Logos (@nullaLabs & @ethernium on X) */
     .corner-logo-container {
       position: absolute;
-      bottom: 22px;
-      right: 28px;
-      z-index: 120;
-      pointer-events: none;
+      bottom: 20px;
+      right: 26px;
+      z-index: 140;
+      pointer-events: auto;
       display: flex;
       align-items: center;
       justify-content: center;
+      gap: 14px;
+    }
+
+    .corner-logo-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), filter 0.2s ease;
+    }
+
+    .corner-logo-link:hover {
+      transform: translateY(-2px) scale(1.1);
+    }
+
+    .corner-logo-link:hover .corner-logo-img {
+      filter: drop-shadow(0 0 14px rgba(0, 240, 255, 0.85)) drop-shadow(0 2px 10px rgba(0, 0, 0, 0.9));
+      opacity: 1;
     }
 
     .corner-logo-img {
-      width: 46px;
-      height: 46px;
+      width: 42px;
+      height: 42px;
       object-fit: contain;
       filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.85)) drop-shadow(0 0 12px rgba(255, 255, 255, 0.35));
       opacity: 0.95;
+      transition: filter 0.2s ease, opacity 0.2s ease;
     }
 
     /* Fullscreen mode: video inside iOS glass window surrounded by rhythm-colored glass */
@@ -837,6 +857,7 @@
       .corner-logo-container {
         bottom: 7px;
         right: 10px;
+        gap: 8px;
       }
 
       .corner-logo-img {
@@ -1198,7 +1219,7 @@
 
       <div id="right-margin-downloads">
         <!-- 1. Download Original Image -->
-        <a href="./assets/downloads/RYODAN_SPACE_MAEVE_ORIGINAL.png" download="RYODAN_SPACE_MAEVE_ORIGINAL.png" class="dl-card glass-panel-3d" title="Download Original Artwork Image (2668x1500 PNG)">
+        <a href="./assets/downloads/RYODAN_SPACE_MAVE_ORIGINAL.png" download="RYODAN_SPACE_MAVE_ORIGINAL.png" class="dl-card glass-panel-3d" title="Download Original Artwork Image (2668x1500 PNG)">
           <div class="dl-thumb-wrap">
             <img src="./assets/downloads/thumb_original.webp" alt="Original Image" class="dl-thumb-media">
           </div>
@@ -1206,7 +1227,7 @@
         </a>
 
         <!-- 2. Download Video (with 3-second looping video preview) -->
-        <a href="./assets/downloads/RYODAN_SPACE_MAEVE_4K_VIDEO.mp4" download="RYODAN_SPACE_MAEVE_4K_VIDEO.mp4" class="dl-card glass-panel-3d" title="Download 4K Video (MP4)">
+        <a href="./assets/downloads/RYODAN_SPACE_MAVE_4K_VIDEO.mp4" download="RYODAN_SPACE_MAVE_4K_VIDEO.mp4" class="dl-card glass-panel-3d" title="Download 4K Video (MP4)">
           <div class="dl-thumb-wrap">
             <video src="./assets/downloads/preview_3s.mp4" autoplay loop muted playsinline class="dl-thumb-media"></video>
           </div>
@@ -1220,13 +1241,13 @@
           </div>
           <span class="dl-btn-label">&#11015; DOWNLOAD GIF</span>
           <div class="dl-gif-subbtns">
-            <a href="./assets/downloads/RYODAN_SPACE_MAEVE_GIF_MAX_HD.gif" download="RYODAN_SPACE_MAEVE_GIF_MAX_HD.gif" class="dl-subbtn" title="Download Max Quality GIF (1080p Vector)">MAX HD</a>
-            <a href="./assets/downloads/RYODAN_SPACE_MAEVE_GIF_LIGHT.gif" download="RYODAN_SPACE_MAEVE_GIF_LIGHT.gif" class="dl-subbtn" title="Download Light GIF (<15 MB)">LIGHT</a>
+            <a href="./assets/downloads/RYODAN_SPACE_MAVE_GIF_MAX_HD.gif" download="RYODAN_SPACE_MAVE_GIF_MAX_HD.gif" class="dl-subbtn" title="Download Max Quality GIF (1080p Vector)">MAX HD</a>
+            <a href="./assets/downloads/RYODAN_SPACE_MAVE_GIF_LIGHT.gif" download="RYODAN_SPACE_MAVE_GIF_LIGHT.gif" class="dl-subbtn" title="Download Light GIF (<15 MB)">LIGHT</a>
           </div>
         </div>
 
         <!-- 4. Download Audio (Single button only) -->
-        <a href="./assets/audio/space_maeve.m4a" download="RYODAN_SPACE_MAEVE_AUDIO.m4a" class="dl-audio-only-btn btn-glass-3d" title="Download Original Audio Track (M4A)">
+        <a href="./assets/audio/space_maeve.m4a" download="RYODAN_SPACE_MAVE_AUDIO.m4a" class="dl-audio-only-btn btn-glass-3d" title="Download Original Audio Track (M4A)">
           &#11015; DOWNLOAD AUDIO
         </a>
 
@@ -1274,9 +1295,14 @@
       </div>
     </div>
 
-    <!-- Bottom Right Corner Logo -->
+    <!-- Bottom Right Corner Logos: 1st -> @nullaLabs on X, 2nd -> @ethernium on X -->
     <div class="corner-logo-container">
-      <img src="./assets/logo_corner.png" alt="Sovereign Logo" class="corner-logo-img">
+      <a href="https://x.com/nullaLabs" target="_blank" rel="noopener noreferrer" class="corner-logo-link" title="Visit @nullaLabs on X">
+        <img src="./assets/logo_corner.png" alt="@nullaLabs on X" class="corner-logo-img">
+      </a>
+      <a href="https://x.com/ethernium" target="_blank" rel="noopener noreferrer" class="corner-logo-link" title="Visit @ethernium on X">
+        <img src="./assets/logo_ethernium.png" alt="@ethernium on X" class="corner-logo-img">
+      </a>
     </div>
   </div>
 
