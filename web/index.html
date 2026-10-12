@@ -24,15 +24,23 @@
       -webkit-user-select: none;
     }
 
-    html, body {
-      position: fixed;
-      inset: 0;
+    html {
+      width: 100%;
+      height: 100%;
+      background-color: #03060c;
+      overflow: hidden;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
       background-color: #03060c;
       color: #e2e8f0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, monospace;
       overflow: hidden;
       width: 100%;
       height: 100%;
+      height: 100dvh;
+      position: relative;
       display: flex;
       flex-direction: column;
     }
@@ -50,6 +58,26 @@
       justify-content: center;
       align-items: center;
       background: radial-gradient(circle at center, #070d1e 0%, #020409 100%);
+    }
+
+    /* iOS Forced 90-Degree Landscape Mode (when iPhone Portrait Lock is ON or inside iOS in-app webviews) */
+    @media screen and (orientation: portrait) {
+      body.ios-landscape-rot #rotate-device-overlay {
+        display: none !important;
+      }
+      body.ios-landscape-rot #canvas-container,
+      body.ios-landscape-rot #loading-overlay {
+        position: fixed !important;
+        top: 50% !important;
+        left: 50% !important;
+        width: 100vh !important;
+        height: 100vw !important;
+        width: 100dvh !important;
+        height: 100dvw !important;
+        -webkit-transform: translate(-50%, -50%) rotate(90deg) !important;
+        transform: translate(-50%, -50%) rotate(90deg) !important;
+        transform-origin: center center !important;
+      }
     }
 
     #webgl-canvas {
@@ -410,12 +438,25 @@
       animation: spinClockwise 10s linear infinite;
     }
 
-    @keyframes spinClockwise {
-      from {
-        transform: rotate(0deg);
+    @-webkit-keyframes spinClockwise {
+      0% {
+        -webkit-transform: translateZ(0) rotate(0deg);
+        transform: translateZ(0) rotate(0deg);
       }
-      to {
-        transform: rotate(360deg);
+      100% {
+        -webkit-transform: translateZ(0) rotate(360deg);
+        transform: translateZ(0) rotate(360deg);
+      }
+    }
+
+    @keyframes spinClockwise {
+      0% {
+        -webkit-transform: translateZ(0) rotate(0deg);
+        transform: translateZ(0) rotate(0deg);
+      }
+      100% {
+        -webkit-transform: translateZ(0) rotate(360deg);
+        transform: translateZ(0) rotate(360deg);
       }
     }
 
@@ -617,8 +658,9 @@
       display: none;
       position: fixed;
       inset: 0;
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
       background: #03060c;
       z-index: 20000;
       flex-direction: column;
@@ -627,6 +669,7 @@
       gap: 24px;
       padding: 32px;
       text-align: center;
+      cursor: pointer;
     }
 
     .rotate-compass-symbol {
@@ -636,6 +679,10 @@
       filter: none !important;
       box-shadow: none !important;
       opacity: 0.92;
+      will-change: transform;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      -webkit-animation: spinClockwise 10s linear infinite;
       animation: spinClockwise 10s linear infinite;
     }
 
@@ -664,7 +711,7 @@
       line-height: 1.5;
     }
 
-    @media screen and (max-width: 920px) and (orientation: portrait) {
+    @media screen and (max-width: 950px) and (orientation: portrait) {
       #rotate-device-overlay {
         display: flex;
       }
@@ -799,7 +846,7 @@
     <img src="./assets/bar_compass_logo_white.png" class="rotate-compass-symbol" alt="Rotate Device Symbol">
     <div class="rotate-text-group">
       <div class="rotate-title-en">PLEASE ROTATE YOUR PHONE</div>
-      <div class="rotate-subtitle-en">TURN YOUR DEVICE TO LANDSCAPE MODE FOR THE 4K STUDIO EXPERIENCE</div>
+      <div class="rotate-subtitle-en">TURN YOUR DEVICE TO LANDSCAPE MODE FOR THE EXPERIENCE</div>
     </div>
   </div>
 

@@ -92,18 +92,28 @@ export class HudController {
   }
 
   toggleFullscreen() {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().then(() => {
-        if (screen.orientation && screen.orientation.lock) {
-          screen.orientation.lock('landscape').catch(() => {});
-        }
-      }).catch((err) => {
-        console.warn("Fullscreen request error:", err);
-      });
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
+    const docEl = document.documentElement;
+    const reqFs = docEl.requestFullscreen || docEl.webkitRequestFullscreen;
+    const exitFs = document.exitFullscreen || document.webkitExitFullscreen;
+    const isNativeFs = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+
+    if (reqFs) {
+      if (!isNativeFs) {
+        reqFs.call(docEl).then(() => {
+          if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock('landscape').catch(() => {});
+          }
+        }).catch(() => {
+          document.body.classList.toggle('fs-mode');
+          if (window.ryodanApp) window.ryodanApp.handleResize();
+        });
+      } else if (exitFs) {
+        exitFs.call(document);
       }
+    } else {
+      // iOS Safari fallback (iPhone does not expose Fullscreen API on documentElement)
+      document.body.classList.toggle('fs-mode');
+      if (window.ryodanApp) window.ryodanApp.handleResize();
     }
   }
 

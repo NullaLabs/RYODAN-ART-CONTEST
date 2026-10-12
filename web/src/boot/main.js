@@ -26,14 +26,39 @@ class RyodanStudioApp {
     // 1. Initialize Audio
     await this.audio.init();
 
-    // 2. Setup Responsive Canvas Resize & Mobile Orientation Handling
+    // 2. Setup Responsive Canvas Resize & Mobile/iOS Orientation Handling
+    const rotateOverlay = document.getElementById('rotate-device-overlay');
+    if (rotateOverlay) {
+      const enableForcedLandscape = () => {
+        document.body.classList.add('ios-landscape-rot');
+        this.handleResize();
+      };
+      rotateOverlay.addEventListener('click', enableForcedLandscape);
+      rotateOverlay.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        enableForcedLandscape();
+      }, { passive: false });
+    }
+
+    window.addEventListener('deviceorientation', (e) => {
+      if (window.innerHeight > window.innerWidth && e && typeof e.gamma === 'number') {
+        if (Math.abs(e.gamma) > 52 && Math.abs(e.beta || 0) < 45) {
+          if (!document.body.classList.contains('ios-landscape-rot')) {
+            document.body.classList.add('ios-landscape-rot');
+            this.handleResize();
+          }
+        }
+      }
+    });
+
     this.handleResize();
     window.addEventListener('resize', () => this.handleResize());
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', () => this.handleResize());
     }
     window.addEventListener('orientationchange', () => {
-      setTimeout(() => this.handleResize(), 120);
+      setTimeout(() => this.handleResize(), 80);
+      setTimeout(() => this.handleResize(), 280);
     });
     document.addEventListener('fullscreenchange', () => {
       document.body.classList.toggle('fs-mode', !!document.fullscreenElement);
@@ -54,8 +79,17 @@ class RyodanStudioApp {
 
   handleResize() {
     const container = document.getElementById('canvas-container');
-    const width = window.innerWidth || container.clientWidth;
-    const height = window.innerHeight || container.clientHeight;
+    const rawW = (window.visualViewport ? window.visualViewport.width : window.innerWidth) || container.clientWidth;
+    const rawH = (window.visualViewport ? window.visualViewport.height : window.innerHeight) || container.clientHeight;
+
+    // If native browser rotated to landscape, clear forced 90deg CSS rotation
+    if (rawW > rawH && document.body.classList.contains('ios-landscape-rot')) {
+      document.body.classList.remove('ios-landscape-rot');
+    }
+
+    const isForcedRot = document.body.classList.contains('ios-landscape-rot') && rawH > rawW;
+    const width = isForcedRot ? rawH : rawW;
+    const height = isForcedRot ? rawW : rawH;
 
     const isFs = document.body.classList.contains('fs-mode');
     const isCompact = width <= 1024 || height <= 540;
