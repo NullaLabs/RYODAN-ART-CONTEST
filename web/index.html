@@ -88,16 +88,9 @@
       z-index: 10;
     }
 
-    /* Web Margins Cyber Chrono Glass (Outer web margins outside artwork) */
+    /* Hide outer lateral margin panels completely */
     .web-margin-canvas {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      height: 100%;
-      pointer-events: none;
-      z-index: 15;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      display: none !important;
     }
 
     /* Loading Overlay */
@@ -113,14 +106,16 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      gap: 18px;
+      gap: 0;
       transition: opacity 0.5s ease;
     }
 
     .loading-title-row {
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 16px;
+      margin: 0;
     }
 
     .loading-ryodan-logo {
@@ -143,14 +138,17 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      margin: 14px 0 8px 0;
+      margin: 24px 0 24px 0;
     }
 
     .loading-rotating-compass {
-      width: 96px;
-      height: 96px;
+      width: 56px !important;
+      height: 56px !important;
       object-fit: contain;
-      filter: drop-shadow(0 6px 20px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 12px rgba(255, 255, 255, 0.5));
+      filter: none !important;
+      box-shadow: none !important;
+      opacity: 0.95;
+      -webkit-animation: spinClockwise 10s linear infinite;
       animation: spinClockwise 10s linear infinite;
     }
 
@@ -163,6 +161,7 @@
       box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.8), 0 0 16px rgba(0, 240, 255, 0.2);
       overflow: hidden;
       position: relative;
+      margin: 0;
     }
 
     #loading-progress-bar {
@@ -172,6 +171,7 @@
     }
 
     #loading-percent {
+      margin-top: 16px;
       font-size: 13px;
       color: #94a3b8;
       letter-spacing: 2px;
@@ -736,10 +736,14 @@
         font-size: 13px;
         letter-spacing: 2.5px;
       }
+      .loading-compass-wrap {
+        margin: 18px 0 18px 0;
+      }
       .loading-rotating-compass {
-        width: 64px;
-        height: 64px;
+        width: 46px !important;
+        height: 46px !important;
         filter: none !important;
+        box-shadow: none !important;
       }
       .loading-progress-track {
         width: min(78vw, 320px);
@@ -1146,51 +1150,51 @@
     </div>
   </div>
 
-  <!-- Loading State -->
-  <div id="loading-overlay">
-    <div class="loading-title-row">
-      <img class="loading-ryodan-logo" src="./assets/ui_ryodan_logo.png" alt="RYODAN Logo">
-      <span class="loading-art-contest-tag">// ART CONTEST</span>
+    <!-- Loading State -->
+    <div id="loading-overlay">
+      <div class="loading-title-row">
+        <img class="loading-ryodan-logo" src="./assets/ui_ryodan_logo.png" alt="RYODAN Logo">
+        <span class="loading-art-contest-tag">// ART CONTEST</span>
+      </div>
+      <div class="loading-compass-wrap">
+        <img src="./assets/bar_compass_logo_white.png" class="loading-rotating-compass" alt="Compass Logo">
+      </div>
+      <div class="loading-progress-track">
+        <div id="loading-progress-bar" class="liquid-iridescent-bar"></div>
+      </div>
+      <div id="loading-percent">CARGANDO SHADERS Y CAPAS 4K: 0%</div>
     </div>
-    <div class="loading-compass-wrap">
-      <img src="./assets/bar_compass_logo_white.png" class="rotating-compass-logo loading-rotating-compass" alt="Compass Logo">
-    </div>
-    <div class="loading-progress-track">
-      <div id="loading-progress-bar" class="liquid-iridescent-bar"></div>
-    </div>
-    <div id="loading-percent">CARGANDO SHADERS Y CAPAS 4K: 0%</div>
-  </div>
 
-  <!-- Main Viewport -->
-  <div id="canvas-container">
-    <!-- Web Margin Waves Canvas (Strictly outside 16:9 image on web borders) -->
-    <canvas id="margin-waves-left" class="web-margin-canvas"></canvas>
-    <canvas id="margin-waves-right" class="web-margin-canvas"></canvas>
+    <!-- Main Viewport -->
+    <div id="canvas-container">
+      <!-- Web Margin Waves Canvas (Strictly outside 16:9 image on web borders) -->
+      <canvas id="margin-waves-left" class="web-margin-canvas"></canvas>
+      <canvas id="margin-waves-right" class="web-margin-canvas"></canvas>
 
-    <canvas id="margin-waves-frame"></canvas>
-    <div id="fs-glass-window"></div>
+      <canvas id="margin-waves-frame"></canvas>
+      <div id="fs-glass-window"></div>
 
-    <canvas id="webgl-canvas"></canvas>
+      <canvas id="webgl-canvas"></canvas>
 
-    <!-- Header HUD (iOS / iMac 3D Glassmorphism) -->
-    <div class="hud-header">
-      <div class="brand-cluster-3d glass-panel-3d">
-        <div class="brand-header-row">
-          <img class="brand-logo-img" src="./assets/ui_ryodan_logo.png" alt="RYODAN Logo">
-          <span class="brand-art-contest">// ART CONTEST</span>
-        </div>
-        <div class="brand-text-col">
-          <div class="brand-subtitle-white">Contest Entry by Blackbeard</div>
+      <!-- Header HUD (iOS / iMac 3D Glassmorphism) -->
+      <div class="hud-header">
+        <div class="brand-cluster-3d glass-panel-3d">
+          <div class="brand-header-row">
+            <img class="brand-logo-img" src="./assets/ui_ryodan_logo.png" alt="RYODAN Logo">
+            <span class="brand-art-contest">// ART CONTEST</span>
+          </div>
+          <div class="brand-text-col">
+            <div class="brand-subtitle-white">Contest Entry by Blackbeard</div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Top-Right Retractable Download Drawer (Hidden outside right window border by default) -->
-    <div id="right-drawer-wrap">
-      <button id="downloads-drawer-tab" class="drawer-tab-right glass-panel-3d" title="Mostrar / Ocultar Descargas">
-        <span id="dl-tab-arrow">&#9664;</span>
-        <span class="drawer-tab-right-text">DOWNLOADS</span>
-      </button>
+      <!-- Top-Right Retractable Download Drawer (Open by default) -->
+      <div id="right-drawer-wrap" class="open">
+        <button id="downloads-drawer-tab" class="drawer-tab-right glass-panel-3d" title="Mostrar / Ocultar Descargas">
+          <span id="dl-tab-arrow">&#9654;</span>
+          <span class="drawer-tab-right-text">DOWNLOADS</span>
+        </button>
 
       <div id="right-margin-downloads">
         <!-- 1. Download Original Image -->

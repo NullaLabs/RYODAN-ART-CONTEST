@@ -94,8 +94,8 @@ class RyodanStudioApp {
     const isFs = document.body.classList.contains('fs-mode');
     const isCompact = width <= 1024 || height <= 540;
 
-    // Windowed: reserve lateral margin space. Compact/Mobile: reserve bottom bar clearance so dock never covers artwork
-    const reserveMargin = isFs ? 0 : ((width >= 1200) ? 280 : (width >= 740 ? 200 : 160));
+    // Full 16:9 viewport without forced lateral margin panels; compact/mobile reserves bottom clearance
+    const reserveMargin = 0;
     const padX = isFs ? (isCompact ? 20 : 56) : 0;
     const padTop = isFs ? (isCompact ? 12 : 48) : (isCompact ? 6 : 0);
     const padBottom = isFs ? (isCompact ? 50 : 120) : (isCompact ? 42 : 0);
@@ -115,13 +115,10 @@ class RyodanStudioApp {
     this.canvas.style.width = `${Math.floor(renderW)}px`;
     this.canvas.style.height = `${Math.floor(renderH)}px`;
 
-    // Size #right-drawer-wrap to fit strictly inside the right margin space when opened, while staying anchored to right: 0
+    // Size #right-drawer-wrap cleanly anchored to right: 0
     const rightDrawerWrap = document.getElementById('right-drawer-wrap');
     if (rightDrawerWrap) {
-      const canvasRightEdge = Math.floor((width + renderW) / 2);
-      const rightMarginSpace = Math.max(0, Math.floor(width - canvasRightEdge));
-      const drawerW = rightMarginSpace >= 96 ? Math.floor(rightMarginSpace - 28) : 104;
-      rightDrawerWrap.style.width = `${Math.max(68, drawerW)}px`;
+      rightDrawerWrap.style.width = isCompact ? '84px' : '124px';
     }
 
     // Internal buffer size: lock to exact native harmonic resolution (2668x1500 or 3840x2160)
