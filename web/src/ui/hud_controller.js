@@ -103,6 +103,94 @@ export class HudController {
         }
       });
     }
+
+    this.initDrawerTouchScroll();
+  }
+
+  initDrawerTouchScroll() {
+    const container = document.getElementById('right-margin-downloads');
+    if (!container) return;
+
+    let startX = 0;
+    let startY = 0;
+    let startScrollTop = 0;
+    let isTouching = false;
+    let hasMoved = false;
+    let lastPos = 0;
+    let lastTime = 0;
+    let velocity = 0;
+    let animId = null;
+
+    const getPos = (touch, isRot) => (isRot ? -touch.clientX : touch.clientY);
+
+    container.addEventListener('touchstart', (e) => {
+      if (animId) cancelAnimationFrame(animId);
+      const isRot = document.body.classList.contains('ios-landscape-rot');
+      const touch = e.touches[0];
+      startX = touch.clientX;
+      startY = touch.clientY;
+      startScrollTop = container.scrollTop;
+      lastPos = getPos(touch, isRot);
+      lastTime = performance.now();
+      isTouching = true;
+      hasMoved = false;
+      velocity = 0;
+    }, { passive: true });
+
+    container.addEventListener('touchmove', (e) => {
+      if (!isTouching) return;
+      const isRot = document.body.classList.contains('ios-landscape-rot');
+      const touch = e.touches[0];
+      const curPos = getPos(touch, isRot);
+      const initialPos = isRot ? -startX : startY;
+      const delta = curPos - initialPos;
+
+      if (Math.abs(delta) > 5) {
+        hasMoved = true;
+      }
+
+      const now = performance.now();
+      const dt = now - lastTime;
+      if (dt > 0) {
+        velocity = (curPos - lastPos) / dt;
+        lastPos = curPos;
+        lastTime = now;
+      }
+
+      container.scrollTop = startScrollTop - delta;
+    }, { passive: true });
+
+    const endTouch = () => {
+      if (!isTouching) return;
+      isTouching = false;
+
+      // Kinetic momentum decay
+      if (Math.abs(velocity) > 0.12) {
+        let v = velocity * 15.0;
+        const decay = () => {
+          if (Math.abs(v) < 0.3) return;
+          container.scrollTop -= v;
+          v *= 0.92;
+          animId = requestAnimationFrame(decay);
+        };
+        animId = requestAnimationFrame(decay);
+      }
+
+      // Suppress accidental click when finger was swiping
+      if (hasMoved) {
+        const preventClick = (ev) => {
+          ev.preventDefault();
+          ev.stopPropagation();
+        };
+        container.addEventListener('click', preventClick, { capture: true, once: true });
+        setTimeout(() => {
+          container.removeEventListener('click', preventClick, { capture: true });
+        }, 100);
+      }
+    };
+
+    container.addEventListener('touchend', endTouch, { passive: true });
+    container.addEventListener('touchcancel', endTouch, { passive: true });
   }
 
   updatePlayState(isPlaying) {
