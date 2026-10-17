@@ -8,10 +8,10 @@
   </a>
 </div>
 
-🌐 **Live Interactive 4K Studio (Click to Play with Music):**  
-👉 **[▶️ PLAY RYODAN // SPACE MAVE — 4K SOVEREIGN AUDIO-REACTIVE STUDIO](https://nullalabs.github.io/RYODAN-ART-CONTEST/?autoplay=1)**  
+🌐 **Live Interactive 4K Studio (Official Sovereign Domain):**  
+👉 **[▶️ PLAY RYODAN // SPACE MAVE — 4K SOVEREIGN AUDIO-REACTIVE STUDIO](https://ethernium.io/ArtGallery/Ryodan/ArtContest/?autoplay=1)**  
 🐦 **Official Contest Host:** **[@Ryodan (@Ryodan_mave on X)](https://x.com/Ryodan_mave?s=20)**  
-⚡ **Mirror Direct Tunnel:** **[RYODAN-ART-CONTEST (Live Tunnel)](https://indicators-hobbies-intelligence-publishers.trycloudflare.com/?autoplay=1)**
+⚡ **GitHub Pages Mirror:** **[nullalabs.github.io/RYODAN-ART-CONTEST](https://nullalabs.github.io/RYODAN-ART-CONTEST/?autoplay=1)**
 
 ---
 
@@ -20,8 +20,8 @@
 **RYODAN // SPACE MAVE (ART CONTEST by Ethernium)** is an interactive project developed specifically for the **[@Ryodan](https://x.com/Ryodan_mave?s=20) Art Contest**. It is a high-performance, local-first WebGL audio visualizer engineered with Three.js and custom GLSL shaders that renders a complete 25-layer stacked composite directly in real-time at 60–144+ FPS, maintaining full 4K UHD fidelity with zero CDN dependencies.
 
 - **Contest Host:** [@Ryodan (`@Ryodan_mave` on X)](https://x.com/Ryodan_mave?s=20)
+- **Canonical Sovereign Domain:** [https://ethernium.io/ArtGallery/Ryodan/ArtContest](https://ethernium.io/ArtGallery/Ryodan/ArtContest)
 - **Live Web Experience (GitHub Pages CDN):** [https://nullalabs.github.io/RYODAN-ART-CONTEST/](https://nullalabs.github.io/RYODAN-ART-CONTEST/)
-- **Live Web Experience (Cloudflare Mirror):** [https://indicators-hobbies-intelligence-publishers.trycloudflare.com/](https://indicators-hobbies-intelligence-publishers.trycloudflare.com/)
 - **Visuals:** 25-Layer Cyberpunk PSD Stack (SPACE MAVE Cyber Goddess, Floating City, Dome Ecosystem, Aviation Beacons, HUD, Katakana & MIA Typography, iOS Glass Credits Cartel)
 - **Engine:** Ethernium Sovereign Web GLSL Architecture ([@nullaLabs](https://x.com/nullaLabs) // [@ethernium](https://x.com/ethernium))
 
