@@ -331,21 +331,23 @@ export const CityLightsFragmentShader = `
 
     vec3 syncedTint = mix(domePalette, iridescence, 0.45);
 
-    // Responsive pulse to beats (kick, snare, mids)
-    float pulse = 0.82 + 0.35 * u_kick + 0.25 * u_snare + 0.22 * u_mids + 0.18 * u_echo;
+    // Responsive pulse to beats (kick, snare, mids, echo)
+    float pulse = 0.72 + 0.65 * u_kick + 0.35 * u_snare + 0.28 * u_mids + 0.22 * u_echo;
 
     // CAPA 5: "la capa 5 debe verse un poco menos sutilmente mas difuminada"
-    float aSharp = clamp(pow(lGreen.a, 0.65) * 0.36 * pulse, 0.0, 1.0);
-    float aSoft = clamp(pow(clamp(blurA, 0.0, 1.0), 0.72) * 0.68 * pulse, 0.0, 1.0);
-    float aG = clamp(mix(aSoft, max(aSharp, aSoft), 0.28), 0.0, 0.64);
-    vec3 colG = syncedTint * (1.08 + 0.22 * u_echo + 0.25 * u_kick);
+    float aSharp = clamp(pow(lGreen.a, 0.65) * 0.42 * pulse, 0.0, 1.0);
+    float aSoft = clamp(pow(clamp(blurA, 0.0, 1.0), 0.72) * 0.78 * pulse, 0.0, 1.0);
+    float aG = clamp(mix(aSoft, max(aSharp, aSoft), 0.30), 0.0, 0.82);
+    vec3 colG = syncedTint * (1.10 + 0.30 * u_echo + 0.55 * u_kick);
 
     // CAPA 4: "debe verse y apagarse y encenderse cada 8 segundos"
     float cycle8 = mod(u_time, 8.0);
-    float onOff4 = smoothstep(0.0, 0.8, cycle8) * (1.0 - smoothstep(4.0, 4.8, cycle8));
+    // Smooth harmonic breathing between 0.25 (soft glow) and 1.0 (bright beacon) every 8 seconds
+    float wave8 = 0.5 + 0.5 * sin(cycle8 * 0.785398 - 1.570796);
+    float onOff4 = 0.25 + 0.75 * smoothstep(0.15, 0.85, wave8);
 
-    float aW = clamp(pow(lWhite.a, 0.52) * 1.05 * pulse * onOff4, 0.0, 1.0);
-    vec3 colW = mix(vec3(1.0, 0.98, 0.88), syncedTint, 0.40) * (1.25 + 0.45 * u_kick);
+    float aW = clamp(pow(lWhite.a, 0.52) * 1.15 * pulse * onOff4, 0.0, 1.0);
+    vec3 colW = mix(vec3(1.0, 0.98, 0.88), syncedTint, 0.35) * (1.25 + 0.60 * u_kick);
 
     float outA = clamp(max(aG, aW), 0.0, 1.0);
     vec3 outRgb = (aW > 0.001) ? mix(colG, colW, clamp(aW / max(aG + aW, 0.001), 0.0, 1.0)) : colG;
@@ -417,8 +419,8 @@ export const RedLightsFragmentShader = `
     if (glowR >= glowG) {
       // INSIDE DOME: Subtle red top lights ONLY on the tallest buildings ("mi misma capa pero sutil y preservando la luz alta en los edificios mas altos solo de la capa 3")
       float antennaWave = sin(u_time * 2.8 + vUv.x * 4.0 + u_snare * 1.4);
-      float beaconBlink = 0.54 + 0.46 * (0.5 + 0.5 * antennaWave);
-      float musicBoost = 0.82 + 0.32 * u_kick + 0.24 * u_snare;
+      float beaconBlink = 0.50 + 0.50 * (0.5 + 0.5 * antennaWave);
+      float musicBoost = 0.75 + 0.55 * u_kick + 0.35 * u_snare;
 
       float coreCenter = smoothstep(0.45, 0.92, lRed.a);
       vec3 redCore = vec3(1.0, 0.08, 0.12);
@@ -426,11 +428,11 @@ export const RedLightsFragmentShader = `
       vec3 finalRgb = mix(redCore, warmTip, coreCenter * 0.55);
 
       // Subtle red optical aura
-      finalRgb += vec3(1.0, 0.12, 0.16) * haloA * (0.35 + 0.25 * u_kick);
+      finalRgb += vec3(1.0, 0.12, 0.16) * haloA * (0.40 + 0.45 * u_kick);
 
-      float sharpA = pow(lRed.a, 0.78) * 0.76;
-      float softGlowA = pow(clamp(haloA, 0.0, 1.0), 0.85) * 0.34;
-      float outA = clamp(max(sharpA, softGlowA) * beaconBlink * musicBoost, 0.0, 0.78);
+      float sharpA = pow(lRed.a, 0.78) * 0.85;
+      float softGlowA = pow(clamp(haloA, 0.0, 1.0), 0.85) * 0.45;
+      float outA = clamp(max(sharpA, softGlowA) * beaconBlink * musicBoost, 0.0, 0.88);
       gl_FragColor = vec4(finalRgb, outA);
     } else {
       // OUTSIDE DOME: Authentic Layer 3 outer lights with fast-flowing multi-color gradients & smooth fluid blinking
@@ -448,15 +450,15 @@ export const RedLightsFragmentShader = `
       float osc1 = sin(u_time * (4.6 + 2.2 * u_dropActive) + vUv.x * 5.2 - vUv.y * 3.6) * 0.5 + 0.5;
       float osc2 = cos(u_time * (7.1 + 2.8 * u_dropActive) - vUv.x * 4.0 + vUv.y * 4.8) * 0.5 + 0.5;
       float fluidBlink = 0.38 + 0.62 * mix(osc1, osc2, 0.42);
-      float beatPulse = 0.84 + 0.45 * u_kick + 0.38 * u_snare + 0.28 * u_mids + 0.22 * u_echo;
+      float beatPulse = 0.75 + 0.65 * u_kick + 0.45 * u_snare + 0.30 * u_mids + 0.25 * u_echo;
 
       float coreHighlight = smoothstep(0.50, 0.95, lRed.a);
-      vec3 finalRgb = mix(outerGradRgb, vec3(1.0, 0.98, 0.96), coreHighlight * 0.38) * (1.18 + 0.35 * u_kick + 0.25 * u_snare);
-      finalRgb += outerGradRgb * haloA * 0.45;
+      vec3 finalRgb = mix(outerGradRgb, vec3(1.0, 0.98, 0.96), coreHighlight * 0.45) * (1.18 + 0.55 * u_kick + 0.35 * u_snare);
+      finalRgb += outerGradRgb * haloA * (0.45 + 0.35 * u_kick);
 
-      float sharpA = pow(lRed.a, 0.68) * 0.92;
-      float softGlowA = pow(clamp(haloA, 0.0, 1.0), 0.80) * 0.42;
-      float outA = clamp(max(sharpA, softGlowA) * fluidBlink * beatPulse, 0.0, 0.92);
+      float sharpA = pow(lRed.a, 0.68) * 0.95;
+      float softGlowA = pow(clamp(haloA, 0.0, 1.0), 0.80) * 0.50;
+      float outA = clamp(max(sharpA, softGlowA) * fluidBlink * beatPulse, 0.0, 0.96);
       gl_FragColor = vec4(finalRgb, outA);
     }
   }
